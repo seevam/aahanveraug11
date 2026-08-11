@@ -1,0 +1,288 @@
+/**
+ * Hindi (हिन्दी) strings.
+ *
+ * Typed against the English shape, so any key added there is a compile error
+ * here until it is translated — no silent English fallback on a patient's
+ * screen.
+ *
+ * Note for review before public launch: these are careful translations, but
+ * medical wording deserves a native-speaker and clinician pass, particularly
+ * `validation.*` (where a misread message could lead to a wrong schedule) and
+ * `status.missed`, which must stay factual rather than accusatory.
+ */
+
+import type { Translation } from '../types';
+
+const hi: Translation = {
+  common: {
+    appName: 'आहान आई',
+    tagline: 'हर दिन एक आँख के लिए',
+    save: 'सहेजें',
+    cancel: 'रद्द करें',
+    delete: 'हटाएँ',
+    edit: 'बदलें',
+    add: 'जोड़ें',
+    done: 'पूरा',
+    next: 'आगे',
+    back: 'पीछे',
+    skip: 'छोड़ें',
+    close: 'बंद करें',
+    retry: 'फिर कोशिश करें',
+    loading: 'लोड हो रहा है…',
+    optional: 'वैकल्पिक',
+    today: 'आज',
+    none: 'कोई नहीं',
+    ok: 'ठीक है',
+  },
+
+  onboarding: {
+    welcomeTitle: 'कोई भी बूँद न छूटे',
+    welcomeBody:
+      'आहान आई हर आई ड्रॉप का हिसाब रखता है, उनके बीच सही अंतर रखता है, और समय पर याद दिलाता है।',
+    getStarted: 'शुरू करें',
+    profileTitle: 'ये बूँदें किसके लिए हैं?',
+    profileBody: 'आप बाद में और लोग जोड़ सकते हैं — माता-पिता, जीवनसाथी, या स्वयं।',
+    nameLabel: 'नाम',
+    namePlaceholder: 'जैसे आहान',
+    relationshipLabel: 'रिश्ता',
+    relationshipPlaceholder: 'जैसे माता, स्वयं',
+    medicationTitle: 'पहली दवा जोड़ें',
+    medicationBody: 'आप इसे छोड़ सकते हैं और बाद में दवाएँ जोड़ सकते हैं।',
+    notificationsTitle: 'रिमाइंडर चालू करें',
+    notificationsBody:
+      'खुराक का समय होने पर सूचित करने के लिए आहान आई को अनुमति चाहिए। इसके बिना रिमाइंडर आप तक नहीं पहुँच पाएँगे।',
+    notificationsEnable: 'रिमाइंडर चालू करें',
+    notificationsLater: 'अभी नहीं',
+    notificationsDenied:
+      'रिमाइंडर बंद हैं। आप इन्हें कभी भी फ़ोन की सेटिंग्स में चालू कर सकते हैं।',
+  },
+
+  tabs: {
+    today: 'आज',
+    reminders: 'रिमाइंडर',
+    reports: 'रिपोर्ट',
+    profile: 'प्रोफ़ाइल',
+  },
+
+  today: {
+    title: 'आज',
+    nextDose: 'अगली खुराक',
+    noDosesTitle: 'आज कुछ निर्धारित नहीं है',
+    noDosesBody: 'रिमाइंडर जोड़ें और वह यहाँ दिखाई देगा।',
+    allDoneTitle: 'आज के लिए सब पूरा',
+    allDoneBody: 'हर खुराक दर्ज हो चुकी है। कल मिलते हैं।',
+    remaining_one: 'आज {{count}} खुराक बाकी',
+    remaining_other: 'आज {{count}} खुराकें बाकी',
+    upcoming: 'आने वाली',
+    earlier: 'आज पहले',
+    markTaken: 'ले ली',
+    snooze: 'बाद में',
+    skipDose: 'छोड़ें',
+    undo: 'पूर्ववत करें',
+    movedFor: 'बूँदों के बीच {{minutes}} मिनट का अंतर रखने के लिए {{time}} पर किया गया',
+  },
+
+  status: {
+    pending: 'बाकी',
+    taken: 'ले ली',
+    snoozed: 'टाली गई',
+    skipped: 'छोड़ी गई',
+    missed: 'छूट गई',
+  },
+
+  eye: {
+    left: 'बाईं आँख',
+    right: 'दाईं आँख',
+    both: 'दोनों आँखें',
+  },
+
+  reminders: {
+    title: 'रिमाइंडर',
+    emptyTitle: 'अभी कोई रिमाइंडर नहीं',
+    emptyBody: 'आपको जो बूँदें बताई गई हैं उन्हें जोड़ें, हम उनका समय तय कर देंगे।',
+    addReminder: 'रिमाइंडर जोड़ें',
+    editReminder: 'रिमाइंडर बदलें',
+    active: 'चालू',
+    paused: 'रुका हुआ',
+    pause: 'रोकें',
+    resume: 'फिर चालू करें',
+    deleteTitle: 'यह रिमाइंडर हटाएँ?',
+    deleteBody:
+      'आगे की खुराकें हट जाएँगी। जो खुराकें पहले दर्ज हो चुकी हैं वे रिपोर्ट में बनी रहेंगी।',
+    perDay_one: 'दिन में {{count}} बार',
+    perDay_other: 'दिन में {{count}} बार',
+    everyDay: 'हर दिन',
+    selectedDays: '{{days}}',
+  },
+
+  form: {
+    medication: 'दवा',
+    medicationPlaceholder: 'नाम या ब्रांड लिखें',
+    medicationHint: 'लिखना शुरू करें — हम मिलती-जुलती आई ड्रॉप सुझाएँगे।',
+    medicationFreeText: '“{{name}}” का उपयोग करें',
+    dosage: 'मात्रा',
+    dosagePlaceholder: 'जैसे 1 बूँद',
+    whichEye: 'कौन सी आँख',
+    schedule: 'समय-सारणी',
+    modeInterval: 'हर कुछ घंटों में',
+    modeCount: 'तय संख्या में बार',
+    modeTimes: 'निश्चित समय पर',
+    modeIntervalHint: 'जैसे 08:00 से 20:00 के बीच हर 2 घंटे',
+    modeCountHint: 'जैसे 09:00 से, 10 मिनट के अंतर पर 5 बार',
+    modeTimesHint: 'जैसे 08:00 और 20:00',
+    startTime: 'पहली खुराक',
+    endTime: 'आख़िरी खुराक तक',
+    every: 'हर',
+    minutes: 'मिनट',
+    hours: 'घंटे',
+    numberOfDoses: 'खुराकों की संख्या',
+    gapBetween: 'खुराकों के बीच अंतर',
+    times: 'समय',
+    addTime: 'समय जोड़ें',
+    days: 'दिन',
+    startDate: 'शुरू',
+    endDate: 'समाप्त',
+    endDateNever: 'कोई अंतिम तिथि नहीं',
+    snoozeSettings: 'टालना',
+    snoozeLength: 'कितनी देर टालें',
+    snoozeLimit: 'अधिकतम कितनी बार टालें',
+    alerts: 'सूचनाएँ',
+    sound: 'आवाज़',
+    vibration: 'कंपन',
+    preview: 'झलक',
+    previewTitle: 'आपका दिन ऐसा दिखेगा',
+    previewShifted: 'दूसरी बूँद से टकराव बचाने के लिए {{from}} से बदला गया',
+    previewOther: '{{name}} — पहले से निर्धारित',
+    previewNone: 'झलक देखने के लिए समय-सारणी भरें।',
+    saveReminder: 'रिमाइंडर सहेजें',
+  },
+
+  validation: {
+    nameRequired: 'कृपया नाम भरें।',
+    medicationRequired: 'कृपया दवा का नाम भरें।',
+    'interval-too-small': 'खुराकों के बीच कम से कम 1 मिनट का अंतर होना चाहिए।',
+    'interval-window-invalid': 'आख़िरी खुराक पहली खुराक के बाद होनी चाहिए।',
+    'count-too-small': 'कम से कम एक खुराक दर्ज करें।',
+    'count-gap-too-small': 'खुराकों के बीच कम से कम 1 मिनट का अंतर होना चाहिए।',
+    'count-overflows-day':
+      'इतनी खुराकें आधी रात से पहले नहीं आ पाएँगी — आख़िरी {{time}} पर पड़ेगी। कम खुराकें, कम अंतर, या पहले का समय चुनें।',
+    'times-empty': 'कम से कम एक समय जोड़ें।',
+    'times-out-of-range': 'कृपया 00:00 और 23:59 के बीच का समय भरें।',
+    'no-days-selected': 'कम से कम एक दिन चुनें।',
+    'date-range-invalid': 'अंतिम तिथि शुरुआती तिथि के बाद होनी चाहिए।',
+    infeasibleTitle: 'यह समय-सारणी ठीक नहीं बैठ रही',
+    infeasibleShift:
+      '{{time}} पर {{name}} को आपकी दूसरी बूँदों से {{gap}} मिनट दूर रखना बिना बहुत आगे खिसकाए संभव नहीं है। इन बूँदों को और दूर-दूर रखें।',
+    infeasibleMidnight:
+      'बूँदों के बीच अंतर लगाने पर {{time}} पर {{name}} आधी रात के बाद चली जाएगी। कोई पहले का समय चुनें।',
+  },
+
+  reports: {
+    title: 'रिपोर्ट',
+    range7: '7 दिन',
+    range30: '30 दिन',
+    range90: '90 दिन',
+    adherence: 'ली गई खुराकें',
+    ofEvaluated: '{{total}} में से {{taken}} खुराकें',
+    noDataTitle: 'अभी कोई इतिहास नहीं',
+    noDataBody: 'जैसे ही आप खुराकें दर्ज करना शुरू करेंगे, रिपोर्ट यहाँ दिखेगी।',
+    taken: 'ली गई',
+    missed: 'छूटी',
+    skipped: 'छोड़ी',
+    currentStreak: 'मौजूदा सिलसिला',
+    bestStreak: 'सबसे लंबा सिलसिला',
+    days_one: '{{count}} दिन',
+    days_other: '{{count}} दिन',
+    byMedication: 'दवा के अनुसार',
+    share: 'रिपोर्ट साझा करें',
+    onTrack: 'सही राह पर',
+    needsAttention: 'सुधार की गुंजाइश',
+    outstandingNote: '{{count}} आने वाली खुराकें अभी गिनी नहीं गई हैं।',
+  },
+
+  profile: {
+    title: 'प्रोफ़ाइल',
+    people: 'लोग',
+    addPerson: 'व्यक्ति जोड़ें',
+    editPerson: 'व्यक्ति बदलें',
+    deletePersonTitle: '{{name}} को हटाएँ?',
+    deletePersonBody:
+      'इससे उनके रिमाइंडर और पूरा खुराक इतिहास हट जाएगा। इसे वापस नहीं लाया जा सकता।',
+    deleteLastPersonBody: 'यह आपकी इकलौती प्रोफ़ाइल है। इसे हटाने से ऐप का सारा डेटा मिट जाएगा।',
+    settings: 'सेटिंग्स',
+    language: 'भाषा',
+    security: 'ऐप लॉक',
+    backup: 'बैकअप',
+    about: 'ऐप के बारे में',
+    notificationsStatus: 'रिमाइंडर',
+    notificationsOn: 'चालू',
+    notificationsOff: 'बंद — ठीक करने के लिए दबाएँ',
+    version: 'संस्करण {{version}}',
+    dataNote: 'आपका सारा डेटा इसी फ़ोन में रहता है। कहीं नहीं भेजा जाता।',
+  },
+
+  security: {
+    title: 'ऐप लॉक',
+    description: 'आहान आई खोलने से पहले PIN माँगें। आपका दवा इतिहास स्वास्थ्य जानकारी है।',
+    enable: 'ऐप लॉक चालू करें',
+    disable: 'ऐप लॉक बंद करें',
+    setPin: '4 अंकों का PIN चुनें',
+    confirmPin: 'दोबारा भरें',
+    pinMismatch: 'दोनों PIN मेल नहीं खाए। फिर कोशिश करें।',
+    unlockTitle: 'अपना PIN भरें',
+    wrongPin: 'ग़लत PIN।',
+    useBiometric: 'बायोमेट्रिक का उपयोग करें',
+    biometricPrompt: 'आहान आई अनलॉक करें',
+    biometricUnavailable: 'इस फ़ोन में बायोमेट्रिक सेट नहीं है।',
+  },
+
+  backup: {
+    title: 'बैकअप',
+    description:
+      'आपका डेटा केवल इसी फ़ोन में है। बैकअप फ़ाइल सहेजें ताकि फ़ोन बदलने या खोने पर उसे वापस पा सकें।',
+    exportAction: 'बैकअप सहेजें',
+    exportSuccess: 'बैकअप सहेजा गया।',
+    exportFailed: 'बैकअप सहेजा नहीं जा सका।',
+    importAction: 'बैकअप से वापस लाएँ',
+    importWarningTitle: 'यह बैकअप वापस लाएँ?',
+    importWarningBody:
+      'यह ऐप में मौजूद सब कुछ बदल देगा — सभी लोग, रिमाइंडर और खुराक इतिहास।',
+    importSuccess: '{{patients}} लोग और {{reminders}} रिमाइंडर वापस लाए गए।',
+    importFailed: 'यह फ़ाइल आहान आई बैकअप के रूप में पढ़ी नहीं जा सकी।',
+    importVersionMismatch: 'यह बैकअप ऐप के नए संस्करण से बना है।',
+    lastBackup: 'पिछला बैकअप: {{date}}',
+    neverBackedUp: 'आपने अभी तक बैकअप नहीं बनाया है।',
+  },
+
+  alarm: {
+    timeFor: 'समय हो गया',
+    taken: 'ले ली',
+    snooze: '{{minutes}} मिनट बाद',
+    skip: 'यह खुराक छोड़ें',
+    snoozeLimitReached: 'आप इस खुराक को अधिकतम बार टाल चुके हैं।',
+    scheduledFor: '{{time}} के लिए निर्धारित',
+  },
+
+  days: {
+    sun: 'रवि',
+    mon: 'सोम',
+    tue: 'मंगल',
+    wed: 'बुध',
+    thu: 'गुरु',
+    fri: 'शुक्र',
+    sat: 'शनि',
+  },
+
+  medicationClass: {
+    glaucoma: 'ग्लूकोमा',
+    lubricant: 'सूखी आँख / चिकनाई',
+    antibiotic: 'एंटीबायोटिक',
+    steroid: 'स्टेरॉयड',
+    nsaid: 'सूजन-रोधी',
+    antiallergy: 'एलर्जी-रोधी',
+    mydriatic: 'पुतली फैलाने वाली बूँद',
+    antiviral: 'वायरस-रोधी',
+  },
+};
+
+export default hi;
