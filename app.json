@@ -3,10 +3,12 @@
     "name": "Ahaan Eye",
     "slug": "ahaan-eye",
     "version": "1.0.0",
+    "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "ahaaneye",
     "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
@@ -21,6 +23,7 @@
     },
     "android": {
       "package": "com.ahaaneye.app",
+      "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
@@ -45,7 +48,6 @@
       "expo-sqlite",
       "expo-localization",
       "expo-secure-store",
-      "expo-sharing",
       [
         "expo-splash-screen",
         {

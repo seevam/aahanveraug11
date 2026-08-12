@@ -6,7 +6,7 @@ schedules automatically, reminds you when a dose is due, records every dose as
 Taken / Snoozed / Skipped / Missed, and turns that history into an adherence
 report you can share with a doctor.
 
-Built with Expo (React Native) for **iOS and Android from one codebase**.
+Built with Expo SDK 54 (React Native) for **iOS and Android from one codebase**.
 
 ---
 
@@ -20,9 +20,27 @@ npx expo start
 Scan the QR code with **Expo Go** on your phone. No backend to start, no
 database to provision — the app is self-contained.
 
-> Expo Go only ever supports the current Expo SDK. This project targets
-> **SDK 57**, which is what the App Store / Play Store copy of Expo Go runs
-> today.
+### Which SDK, and why it matters
+
+Expo Go is a fixed binary in the App Store / Play Store, and each release
+supports **exactly one** Expo SDK. Its release cycle is independent of the
+`expo` npm package, so **npm's `latest` tag is not a guide to what Expo Go can
+run** — at the time of writing npm publishes SDK 57 while the store ships Expo
+Go 54.0.2.
+
+This project therefore targets **SDK 54**, pinned via `sdkVersion` in
+`app.json`.
+
+Before changing the SDK, check what the store actually ships:
+
+```bash
+curl -s "https://itunes.apple.com/lookup?id=982107779" \
+  | python3 -c "import json,sys; print(json.load(sys.stdin)['results'][0]['version'])"
+```
+
+Targeting an SDK *above* what Expo Go ships gives "Project is incompatible with
+this version of Expo Go — requires a newer version". Targeting one *below* gives
+the mirror-image error. A development build removes the constraint entirely.
 
 ### Other commands
 
