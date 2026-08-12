@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { Screen, Text, Spacer, Row, Card } from '../src/components/primitives';
+import { Card, EmojiIcon, Row, Screen, Spacer, Text } from '../src/components/primitives';
 import { Button } from '../src/components/Button';
 import { Field, TextField } from '../src/components/inputs';
 import { useTheme } from '../src/theme/ThemeProvider';
@@ -73,9 +73,7 @@ export default function Onboarding() {
     <Screen contentStyle={{ flexGrow: 1, justifyContent: 'center' }}>
       {step === 'welcome' ? (
         <View>
-          <Text style={{ fontSize: 64, textAlign: 'center' }} accessibilityElementsHidden>
-            👁️
-          </Text>
+          <EmojiIcon symbol="👁️" size={64} />
           <Spacer size="xl" />
           <Text variant="display" accessibilityRole="header" style={{ textAlign: 'center' }}>
             {t('onboarding.welcomeTitle')}
@@ -156,9 +154,7 @@ export default function Onboarding() {
 
       {step === 'notifications' ? (
         <View>
-          <Text style={{ fontSize: 56, textAlign: 'center' }} accessibilityElementsHidden>
-            🔔
-          </Text>
+          <EmojiIcon symbol="🔔" size={56} />
           <Spacer size="lg" />
           <Text variant="title" accessibilityRole="header" style={{ textAlign: 'center' }}>
             {t('onboarding.notificationsTitle')}

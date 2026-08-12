@@ -1,28 +1,22 @@
 import React from 'react';
-import type { ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Text } from '../../src/components/primitives';
+import { EmojiIcon } from '../../src/components/primitives';
 import { useTheme } from '../../src/theme/ThemeProvider';
 
-/**
- * Emoji tab icons keep the app icon-library-free, which keeps the bundle small
- * and avoids a native font dependency that Expo Go would have to resolve.
- * Labels are always shown — icon-only tabs are a usability problem for the
- * audience.
- */
-function TabIcon({ symbol, color }: { symbol: string; color: ColorValue }) {
-  return (
-    <Text style={{ fontSize: 22, color }} accessibilityElementsHidden importantForAccessibility="no">
-      {symbol}
-    </Text>
-  );
-}
+const ICON_SIZE = 24;
 
 export default function TabsLayout() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+
+  // The bar has to fit an icon, its label, and the home indicator on phones
+  // that have one. A fixed height ignores the inset and crops the icons, so
+  // derive it instead.
+  const barHeight = 58 + insets.bottom;
 
   return (
     <Tabs
@@ -33,9 +27,15 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.border,
-          height: 64,
-          paddingBottom: 8,
-          paddingTop: 8,
+          height: barHeight,
+          paddingTop: 6,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+        },
+        tabBarIconStyle: {
+          // Give the glyph a box at least as tall as its line height, so it is
+          // centred rather than clipped.
+          height: Math.ceil(ICON_SIZE * 1.35),
+          width: Math.ceil(ICON_SIZE * 1.35),
         },
         tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
       }}
@@ -44,28 +44,28 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: t('tabs.today'),
-          tabBarIcon: ({ color }) => <TabIcon symbol="💧" color={color} />,
+          tabBarIcon: ({ color }) => <EmojiIcon symbol="💧" size={ICON_SIZE} color={color} />,
         }}
       />
       <Tabs.Screen
         name="reminders"
         options={{
           title: t('tabs.reminders'),
-          tabBarIcon: ({ color }) => <TabIcon symbol="⏰" color={color} />,
+          tabBarIcon: ({ color }) => <EmojiIcon symbol="⏰" size={ICON_SIZE} color={color} />,
         }}
       />
       <Tabs.Screen
         name="reports"
         options={{
           title: t('tabs.reports'),
-          tabBarIcon: ({ color }) => <TabIcon symbol="📊" color={color} />,
+          tabBarIcon: ({ color }) => <EmojiIcon symbol="📊" size={ICON_SIZE} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t('tabs.profile'),
-          tabBarIcon: ({ color }) => <TabIcon symbol="👤" color={color} />,
+          tabBarIcon: ({ color }) => <EmojiIcon symbol="👤" size={ICON_SIZE} color={color} />,
         }}
       />
     </Tabs>

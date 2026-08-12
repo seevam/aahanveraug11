@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { Screen, Spacer, Text } from '../src/components/primitives';
+import { EmojiIcon, Screen, Spacer, Text } from '../src/components/primitives';
 import { Button } from '../src/components/Button';
 import { Field, TextField } from '../src/components/inputs';
 import { useTheme } from '../src/theme/ThemeProvider';
@@ -54,9 +54,7 @@ export default function LockScreen() {
   return (
     <Screen scroll={false} contentStyle={{ justifyContent: 'center' }}>
       <View style={{ alignItems: 'center' }}>
-        <Text style={{ fontSize: 56 }} accessibilityElementsHidden>
-          🔒
-        </Text>
+        <EmojiIcon symbol="🔒" size={56} />
         <Spacer size="lg" />
         <Text variant="title" accessibilityRole="header">
           {t('security.unlockTitle')}

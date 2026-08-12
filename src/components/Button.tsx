@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useTheme } from '../theme/ThemeProvider';
-import { Text } from './primitives';
+import { EmojiIcon, Text } from './primitives';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'success' | 'danger';
 export type ButtonSize = 'regular' | 'large';
@@ -85,9 +85,7 @@ export function Button({
       ) : (
         <>
           {icon ? (
-            <Text style={{ fontSize: 20, color: surface.fg }} accessibilityElementsHidden>
-              {icon}
-            </Text>
+            <EmojiIcon symbol={icon} size={18} color={surface.fg} />
           ) : null}
           <Text
             variant={size === 'large' ? 'subheading' : 'bodyStrong'}

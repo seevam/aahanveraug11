@@ -38,6 +38,16 @@ export function Text({
 
   const typeStyle = theme.typography[variant];
 
+  // A caller that overrides `fontSize` through `style` — larger emoji, a
+  // scaled avatar initial — would otherwise keep the variant's `lineHeight`
+  // and get clipped, because a 64pt glyph does not fit a 24pt line box.
+  // Scale the line box with the font instead, and let an explicit
+  // `lineHeight` in `style` still win since it is applied afterwards.
+  const flattened = StyleSheet.flatten(style) as TextStyle | undefined;
+  const effectiveFontSize =
+    typeof flattened?.fontSize === 'number' ? flattened.fontSize : typeStyle.fontSize;
+  const lineHeightRatio = typeStyle.lineHeight / typeStyle.fontSize;
+
   return (
     <RNText
       // Respect the OS font-size setting, but stop runaway scaling from
@@ -46,7 +56,7 @@ export function Text({
       style={[
         {
           fontSize: typeStyle.fontSize,
-          lineHeight: typeStyle.lineHeight,
+          lineHeight: Math.ceil(effectiveFontSize * lineHeightRatio),
           fontWeight: typeStyle.fontWeight as TextStyle['fontWeight'],
           color: toneColor[tone],
         },
@@ -54,6 +64,50 @@ export function Text({
       ]}
       {...rest}
     />
+  );
+}
+
+/**
+ * A decorative emoji glyph.
+ *
+ * Emoji overflow the em box that Latin text fits inside, so they need a
+ * noticeably taller line box than the same-size text or the top and bottom get
+ * clipped — most visibly on Android, whose default line box is tighter. They
+ * also carry no meaning here (every icon sits beside a text label), so they are
+ * hidden from screen readers, and their size is fixed so a large OS font
+ * setting cannot break the layout around them.
+ */
+export function EmojiIcon({
+  symbol,
+  size,
+  color,
+  style,
+}: {
+  symbol: string;
+  size: number;
+  color?: string;
+  style?: StyleProp<TextStyle>;
+}) {
+  const lineHeight = Math.ceil(size * 1.35);
+  return (
+    <RNText
+      accessibilityElementsHidden
+      importantForAccessibility="no"
+      allowFontScaling={false}
+      style={[
+        {
+          fontSize: size,
+          lineHeight,
+          textAlign: 'center',
+          // Android adds vertical font padding that crops tall glyphs.
+          includeFontPadding: false,
+          ...(color ? { color } : null),
+        },
+        style,
+      ]}
+    >
+      {symbol}
+    </RNText>
   );
 }
 
@@ -176,13 +230,7 @@ export function EmptyState({
   const theme = useTheme();
   return (
     <View style={{ alignItems: 'center', paddingVertical: theme.spacing.xxl }}>
-      <Text
-        style={{ fontSize: 48, lineHeight: 56, marginBottom: theme.spacing.md }}
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-      >
-        {icon}
-      </Text>
+      <EmojiIcon symbol={icon} size={48} style={{ marginBottom: theme.spacing.md }} />
       <Text variant="heading" style={{ textAlign: 'center' }}>
         {title}
       </Text>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
 
 import { useTheme } from '../theme/ThemeProvider';
-import { Row, Text } from './primitives';
+import { EmojiIcon, Row, Text } from './primitives';
 import { hhmmToMinutes, minutesToHHMM } from '../scheduling/engine';
 import type { Weekday } from '../scheduling/types';
 
@@ -511,7 +511,7 @@ export function TimeList({
               backgroundColor: theme.colors.dangerSubtle,
             }}
           >
-            <Text style={{ color: theme.colors.onDangerSubtle, fontSize: 20 }}>✕</Text>
+            <EmojiIcon symbol="✕" size={18} color={theme.colors.onDangerSubtle} />
           </Pressable>
         </Row>
       ))}
