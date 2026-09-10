@@ -216,3 +216,23 @@ export const elevation = {
     elevation: 6,
   },
 } as const;
+
+/**
+ * Bottle cap colours.
+ *
+ * These represent a physical object, so unlike every other colour in this file
+ * they do NOT change between light and dark — a yellow cap is yellow in both.
+ * Each swatch is drawn with a border so the pale ones stay visible on a white
+ * surface and the dark ones on a dark surface.
+ */
+export const capColours = {
+  yellow: '#EFBF2E',
+  teal: '#14A3A0',
+  purple: '#8B5CC7',
+  orange: '#E3802F',
+  darkBlue: '#2A5CA5',
+  green: '#3C9A4E',
+  red: '#D1453B',
+  pink: '#E87FA0',
+  tan: '#C0996B',
+} as const;

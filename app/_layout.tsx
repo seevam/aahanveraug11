@@ -56,6 +56,7 @@ function RootNavigator() {
       <Stack.Screen name="reminder/new" options={{ presentation: 'modal', title: '' }} />
       <Stack.Screen name="reminder/[id]" options={{ presentation: 'modal', title: '' }} />
       <Stack.Screen name="patient/new" options={{ presentation: 'modal', title: '' }} />
+      <Stack.Screen name="instructions" options={{ presentation: 'modal', title: '' }} />
     </Stack>
   );
 }

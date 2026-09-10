@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../theme/ThemeProvider';
@@ -17,6 +18,7 @@ import {
   ToggleRow,
 } from './inputs';
 import { searchMedications, type MedicationMatch } from '../medications/catalogue';
+import { CapSwatch } from './CapSwatch';
 import { hhmmToMinutes, minutesForConfig, minutesToHHMM, validateReminder } from '../scheduling/engine';
 import { previewSchedule } from '../services/schedule-service';
 import { todayIn } from '../scheduling/timezone';
@@ -220,10 +222,13 @@ function MedicationPicker({
                 backgroundColor: pressed ? theme.colors.surfaceSunken : 'transparent',
               })}
             >
-              <Text variant="body">
-                {match.viaBrand ? `${match.matchedOn} · ` : ''}
-                {match.entry.generic}
-              </Text>
+              <Row style={{ gap: theme.spacing.sm }}>
+                <CapSwatch medicationId={match.entry.id} />
+                <Text variant="body" style={{ flex: 1 }}>
+                  {match.viaBrand ? `${match.matchedOn} · ` : ''}
+                  {match.entry.generic}
+                </Text>
+              </Row>
               <Text variant="caption" tone="muted">
                 {t(`medicationClass.${match.entry.medicationClass}`)}
                 {match.entry.strengths.length > 0 ? ` · ${match.entry.strengths.join(', ')}` : ''}
@@ -498,6 +503,14 @@ export function ReminderForm({
       ) : null}
 
       {/* ------------------------------------------------------------- alerts */}
+      <Spacer size="md" />
+      <Button
+        label={t('instructions.linkLabel')}
+        variant="ghost"
+        icon="💧"
+        onPress={() => router.push('/instructions')}
+      />
+
       <SectionHeading>{t('form.alerts')}</SectionHeading>
       <Card>
         <ToggleRow

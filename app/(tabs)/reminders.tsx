@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Card, EmptyState, Row, Screen, Spacer, Text } from '../../src/components/primitives';
 import { Button, StatusPill } from '../../src/components/Button';
+import { CapSwatch } from '../../src/components/CapSwatch';
 import { PatientSwitcher } from '../../src/components/PatientSwitcher';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAppStore, useSelectedPatient } from '../../src/stores/app-store';
@@ -46,7 +47,12 @@ function ReminderRow({ reminder, onPress }: { reminder: Reminder; onPress: () =>
     <Card style={{ marginBottom: theme.spacing.md, opacity: reminder.active ? 1 : 0.6 }}>
       <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View style={{ flex: 1 }}>
-          <Text variant="subheading">{reminder.medicationName}</Text>
+          <Row style={{ gap: theme.spacing.sm }}>
+            <CapSwatch medicationId={reminder.medicationId} />
+            <Text variant="subheading" style={{ flex: 1 }}>
+              {reminder.medicationName}
+            </Text>
+          </Row>
           <Text variant="body" tone="secondary" style={{ marginTop: 2 }}>
             {reminder.dosage} · {t(`eye.${reminder.eye}`)}
           </Text>

@@ -4,9 +4,18 @@ import Constants from 'expo-constants';
 import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { Card, Row, Screen, SectionHeading, Spacer, Text } from '../../src/components/primitives';
+import {
+  Card,
+  EmojiIcon,
+  Row,
+  Screen,
+  SectionHeading,
+  Spacer,
+  Text,
+} from '../../src/components/primitives';
 import { Button, PressableRow, StatusPill } from '../../src/components/Button';
 import { Field, Segmented, TextField, ToggleRow } from '../../src/components/inputs';
+import { ImpactCard } from '../../src/components/ImpactCard';
 import { Avatar } from '../../src/components/PatientSwitcher';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAppStore } from '../../src/stores/app-store';
@@ -231,6 +240,21 @@ export default function ProfileScreen() {
         ) : null}
       </Card>
 
+      {/* ------------------------------------------------------------- learn */}
+      <SectionHeading>{t('instructions.title')}</SectionHeading>
+      <PressableRow
+        onPress={() => router.push('/instructions')}
+        accessibilityLabel={t('instructions.linkLabel')}
+      >
+        <EmojiIcon symbol="💧" size={22} />
+        <Text variant="body" style={{ flex: 1 }}>
+          {t('instructions.linkLabel')}
+        </Text>
+        <Text variant="body" tone="muted">
+          ›
+        </Text>
+      </PressableRow>
+
       {/* ---------------------------------------------------------- language */}
       <SectionHeading>{t('profile.language')}</SectionHeading>
       <Segmented
@@ -312,6 +336,10 @@ export default function ProfileScreen() {
           onPress={doImport}
         />
       </Card>
+
+      {/* -------------------------------------------------------------- impact */}
+      <Spacer size="xl" />
+      <ImpactCard />
 
       {/* --------------------------------------------------------------- about */}
       <SectionHeading>{t('profile.about')}</SectionHeading>

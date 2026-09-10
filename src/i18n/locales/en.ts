@@ -279,6 +279,67 @@ const en = {
     mydriatic: 'Dilating drop',
     antiviral: 'Antiviral',
   },
+
+  instructions: {
+    linkLabel: 'How to use eye drops',
+    title: 'How to use eye drops',
+    intro:
+      'Getting the drop into your eye — and keeping it there — matters as much as remembering the dose. These steps take under a minute.',
+    disclaimer:
+      'This is general guidance on technique. It does not replace what your doctor or pharmacist has told you. Always follow their instructions for your own medicines, and ask them if anything here differs from what they said.',
+    stepsHeading: 'Step by step',
+    step1: 'Wash your hands with soap and water, and dry them.',
+    step2: 'Check the bottle: the right medicine, the right eye, and not past its expiry date.',
+    step3: 'If the label says to shake it, shake it gently.',
+    step4:
+      'Open the cap and set it down on a clean surface. Do not let the tip touch anything — not your eye, your eyelashes, or your fingers.',
+    step5: 'Tilt your head back, or lie down, and look up at the ceiling.',
+    step6: 'Gently pull your lower eyelid down with one finger to make a small pocket.',
+    step7:
+      'Hold the bottle above your eye without touching it, and squeeze one drop into the pocket.',
+    step8:
+      'Close your eye gently. Do not squeeze it shut and do not blink hard — that pushes the drop straight out.',
+    step9:
+      'Press lightly on the inner corner of your eye, beside your nose, for one to two minutes. This keeps the drop in your eye.',
+    step10: 'Wipe away anything that runs down with a clean tissue, then put the cap back on.',
+    gapHeading: 'Leave a gap between different drops',
+    gapBody:
+      'Wait at least {{minutes}} minutes before a different drop, or the second one washes the first out. Ahaan Eye already spaces your reminders for you, so just follow the times it gives you.',
+    tipsHeading: 'Worth knowing',
+    tip1: 'One drop is enough. Your eye cannot hold more than one, so a second is wasted.',
+    tip2:
+      'If the drop clearly missed your eye, use one more. If you are not sure whether it went in, ask your doctor or pharmacist.',
+    tip3: 'If you use an ointment or gel as well as drops, put the drops in first and the ointment last.',
+    tip4:
+      'If you wear contact lenses, take them out before your drops and wait about 15 minutes before putting them back in — unless your doctor tells you otherwise.',
+    tip5: 'Never share a bottle with anyone else, even a family member.',
+    tip6:
+      'Store the bottle as the label says, and stop using it after the date your doctor or pharmacist gave you.',
+  },
+
+  capColour: {
+    heading: 'Cap colour',
+    note:
+      'Cap colours follow a common convention for each type of eye medicine. Always read the label as well — colours can differ between brands.',
+    describedAs: '{{colour}} cap',
+    yellow: 'Yellow',
+    teal: 'Teal',
+    purple: 'Purple',
+    orange: 'Orange',
+    darkBlue: 'Dark blue',
+    green: 'Green',
+    red: 'Red',
+    pink: 'Pink',
+    tan: 'Tan',
+  },
+
+  impact: {
+    heading: 'Eye frames funded',
+    raisedLabel: 'Raised so far',
+    framesLabel: 'Frames funded',
+    perFrameNote: '{{amount}} funds one pair of frames for a child who needs them.',
+    asOf: 'As of {{date}}',
+  },
 } as const;
 
 export default en;

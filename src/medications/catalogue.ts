@@ -554,3 +554,100 @@ export function medicationsByClass(): Array<{
     entries: MEDICATIONS.filter((m) => m.medicationClass === medicationClass),
   })).filter((group) => group.entries.length > 0);
 }
+
+/**
+ * Cap-colour coding.
+ *
+ * Ophthalmic manufacturers widely follow a colour convention for bottle caps,
+ * grouped by drug class. For a patient holding four near-identical bottles,
+ * "the orange cap" is far easier than reading a label they may not be able to
+ * focus on — which is exactly this audience.
+ *
+ * Three honest caveats, which is why this is a separate map rather than a
+ * field on every entry:
+ *
+ *  - It is a **convention, not a standard**. Adoption varies by manufacturer
+ *    and by market, and Indian brands do not follow it universally.
+ *  - Classes outside the original scheme (lubricants, anti-allergy, antivirals,
+ *    newer molecules like netarsudil) simply have no assigned colour. Those are
+ *    left absent rather than guessed at.
+ *  - It must never be the only identifier in the UI. Every place a swatch is
+ *    shown, the medication name is shown with it.
+ *
+ * Worth confirming against the brands actually dispensed locally before this
+ * is leaned on in patient-facing material.
+ */
+export type CapColour =
+  | 'yellow'
+  | 'teal'
+  | 'purple'
+  | 'orange'
+  | 'darkBlue'
+  | 'green'
+  | 'red'
+  | 'pink'
+  | 'tan';
+
+export const CAP_COLOURS: Readonly<Record<string, CapColour>> = {
+  // Beta-blockers
+  timolol: 'yellow',
+
+  // Prostaglandin analogues
+  latanoprost: 'teal',
+  bimatoprost: 'teal',
+  travoprost: 'teal',
+
+  // Alpha agonists
+  brimonidine: 'purple',
+
+  // Carbonic anhydrase inhibitors
+  dorzolamide: 'orange',
+  brinzolamide: 'orange',
+
+  // Fixed-dose glaucoma combinations
+  'dorzolamide-timolol': 'darkBlue',
+  'brimonidine-timolol': 'darkBlue',
+  'latanoprost-timolol': 'darkBlue',
+  'brinzolamide-timolol': 'darkBlue',
+  'brinzolamide-brimonidine': 'darkBlue',
+
+  // Miotics
+  pilocarpine: 'green',
+
+  // Mydriatics and cycloplegics
+  tropicamide: 'red',
+  'tropicamide-phenylephrine': 'red',
+  homatropine: 'red',
+  atropine: 'red',
+  cyclopentolate: 'red',
+
+  // Anti-inflammatories — steroidal and non-steroidal alike
+  prednisolone: 'pink',
+  dexamethasone: 'pink',
+  loteprednol: 'pink',
+  fluorometholone: 'pink',
+  difluprednate: 'pink',
+  hydrocortisone: 'pink',
+  nepafenac: 'pink',
+  ketorolac: 'pink',
+  bromfenac: 'pink',
+  flurbiprofen: 'pink',
+
+  // Anti-infectives
+  moxifloxacin: 'tan',
+  gatifloxacin: 'tan',
+  ofloxacin: 'tan',
+  ciprofloxacin: 'tan',
+  tobramycin: 'tan',
+  chloramphenicol: 'tan',
+  'tobramycin-dexamethasone': 'tan',
+  'moxifloxacin-dexamethasone': 'tan',
+  'gatifloxacin-prednisolone': 'tan',
+  'moxifloxacin-loteprednol': 'tan',
+};
+
+/** The cap colour convention for a medication, or undefined when none applies. */
+export function capColourFor(medicationId: string | null | undefined): CapColour | undefined {
+  if (!medicationId) return undefined;
+  return CAP_COLOURS[medicationId];
+}
