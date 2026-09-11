@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text as RNText,
   View,
+  type ColorValue,
   type StyleProp,
   type TextProps,
   type TextStyle,
@@ -85,7 +86,8 @@ export function EmojiIcon({
 }: {
   symbol: string;
   size: number;
-  color?: string;
+  /** ColorValue rather than string: navigation passes platform colour objects. */
+  color?: ColorValue;
   style?: StyleProp<TextStyle>;
 }) {
   const lineHeight = Math.ceil(size * 1.35);

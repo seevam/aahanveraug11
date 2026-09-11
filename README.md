@@ -6,7 +6,7 @@ schedules automatically, reminds you when a dose is due, records every dose as
 Taken / Snoozed / Skipped / Missed, and turns that history into an adherence
 report you can share with a doctor.
 
-Built with Expo SDK 54 (React Native) for **iOS and Android from one codebase**.
+Built with Expo SDK 57 (React Native) for **iOS and Android from one codebase**.
 
 ---
 
@@ -22,25 +22,34 @@ database to provision — the app is self-contained.
 
 ### Which SDK, and why it matters
 
-Expo Go is a fixed binary in the App Store / Play Store, and each release
-supports **exactly one** Expo SDK. Its release cycle is independent of the
-`expo` npm package, so **npm's `latest` tag is not a guide to what Expo Go can
-run** — at the time of writing npm publishes SDK 57 while the store ships Expo
-Go 54.0.2.
+Expo Go is a fixed binary from the App Store / Play Store, and each release
+supports **exactly one** Expo SDK. Target a different one and it refuses to
+open the project:
 
-This project therefore targets **SDK 54**, pinned via `sdkVersion` in
-`app.json`.
+- project SDK **higher** than Expo Go → "requires a newer version of Expo Go"
+- project SDK **lower** than Expo Go → "requires an older version of Expo Go"
 
-Before changing the SDK, check what the store actually ships:
+**Check the version on the phone, not from an API.** Open Expo Go and read the
+version on its home screen. Its major number *is* the SDK it supports, so Expo
+Go 57.x runs SDK 57 projects. Store-listing APIs cache aggressively and have
+returned a months-stale version here, which is exactly how this project ended
+up briefly pinned to the wrong SDK.
+
+`app.json` deliberately does **not** set `sdkVersion`; it is derived from the
+installed `expo` package so the two can never drift apart. To move SDKs, change
+the `expo` dependency and run:
 
 ```bash
-curl -s "https://itunes.apple.com/lookup?id=982107779" \
-  | python3 -c "import json,sys; print(json.load(sys.stdin)['results'][0]['version'])"
+npx expo install --fix   # realign every expo-* package
+npx expo-doctor          # catch config fields the new schema dropped
 ```
 
-Targeting an SDK *above* what Expo Go ships gives "Project is incompatible with
-this version of Expo Go — requires a newer version". Targeting one *below* gives
-the mirror-image error. A development build removes the constraint entirely.
+Then rebuild the tree from scratch — `rm -rf node_modules package-lock.json &&
+npm install` — because React, React Native and every Expo package change
+version together.
+
+A development build removes this constraint entirely: it pins its own SDK and
+never has to agree with a store binary.
 
 ### Other commands
 
