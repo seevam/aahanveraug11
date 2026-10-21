@@ -1,5 +1,5 @@
 /**
- * Design tokens for Ahaan Eye.
+ * Design tokens for Eyedrop Scheduler.
  *
  * The audience is patients with eye conditions — often older, often with
  * imperfect hands and imperfect vision. Three rules drive every value here:

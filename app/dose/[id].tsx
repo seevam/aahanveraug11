@@ -78,6 +78,24 @@ export default function DoseScreen() {
         }}
       >
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          {patient ? (
+            <>
+              <Row
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.22)',
+                  paddingHorizontal: theme.spacing.lg,
+                  paddingVertical: theme.spacing.sm,
+                  borderRadius: theme.radius.pill,
+                }}
+              >
+                <Text variant="subheading" style={{ color: theme.colors.onPrimary }}>
+                  {t('alarm.forPerson', { name: patient.name })}
+                </Text>
+              </Row>
+              <Spacer size="lg" />
+            </>
+          ) : null}
+
           <Text
             variant="label"
             style={{ color: theme.colors.onPrimary, opacity: 0.85 }}
@@ -110,23 +128,7 @@ export default function DoseScreen() {
             {dose.dosage} · {t(`eye.${dose.eye}`)}
           </Text>
 
-          {patient ? (
-            <>
-              <Spacer size="lg" />
-              <Row
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.18)',
-                  paddingHorizontal: theme.spacing.lg,
-                  paddingVertical: theme.spacing.sm,
-                  borderRadius: theme.radius.pill,
-                }}
-              >
-                <Text variant="label" style={{ color: theme.colors.onPrimary }}>
-                  {patient.name}
-                </Text>
-              </Row>
-            </>
-          ) : null}
+
         </View>
 
         <View style={{ gap: theme.spacing.md }}>

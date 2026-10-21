@@ -1,4 +1,4 @@
-# Ahaan Eye — "Impact an Eye Every Day" 👁️
+# Eyedrop Scheduler 👁️
 
 A local-first mobile app that helps patients — and the family members who care
 for them — follow complex eye-drop schedules. It generates conflict-free
@@ -54,7 +54,7 @@ never has to agree with a store binary.
 ### Other commands
 
 ```bash
-npm test          # run the scheduling, conflict, timezone and adherence tests
+npm test          # scheduling, conflict, timezone, adherence, alarm allocation
 npm run typecheck # tsc --noEmit
 npx expo-doctor   # check the project against the installed SDK
 ```
@@ -76,18 +76,17 @@ app/                      Screens (expo-router, file-based)
 src/
   scheduling/             Pure logic — no React, no SQLite, fully tested
     engine.ts             Generates the times a reminder asks for
-    conflict.ts           The 5-minute washout gap
+    conflict.ts           The washout gap between different drops
     timezone.ts           The only module that knows about DST
     adherence.ts          Adherence maths and streaks
   db/                     SQLite schema, migrations, repositories
   notifications/          The single seam onto expo-notifications
   services/               Orchestration: sync, dose actions, backup, security
-  medications/            Bundled India-market eye-drop catalogue
   components/             Design-system components
   theme/                  Colour, type and spacing tokens
   i18n/                   English, Hindi, Tamil
 
-tests/                    68 unit tests over src/scheduling
+tests/                    84 unit tests over the pure logic
 ```
 
 The layering rule: **`src/scheduling` never imports from `src/db`, `src/components`
@@ -109,12 +108,14 @@ Three schedule modes:
 Each can be restricted to particular days of the week, and given a start and
 end date.
 
-### The 5-minute gap
+### The washout gap
 
 Two different eye drops instilled together wash each other out, so
-ophthalmology guidance is a minimum gap — commonly 5 minutes — between
-different drops. The conflict resolver walks a day's doses in order and pushes
-each one forward to at least `previous + 5 minutes`.
+ophthalmology guidance is a minimum gap between different drops. This app
+uses **6 minutes** — the common published minimum is five, and the extra
+minute is headroom for a patient who is slow with the second bottle. The
+conflict resolver walks a day's doses in order and pushes each one forward to
+at least `previous + 6 minutes`.
 
 Two decisions worth knowing about:
 
@@ -144,10 +145,32 @@ resume, after any dose action, and after each notification fires. Doses
 themselves are materialised into SQLite 21 days ahead, independently of what is
 armed.
 
-**The alarm experience cannot be symmetric across the two platforms.** Android's
-full-screen intent over the lock screen has no iOS equivalent. Today the app
-uses `interruptionLevel: 'timeSensitive'` on iOS and a MAX-importance channel on
-Android, which is as far as `expo-notifications` goes.
+**Alarms use the loudest route each platform allows without a custom build.**
+
+On Android the channel is routed to the **ALARM audio stream** with
+`enforceAudibility`, so a dose rings at the phone's *alarm* volume — the one
+people keep turned up to wake themselves — not the notification volume, and the
+ringer switch does not mute it. Importance is MAX, the channel asks to bypass
+Do Not Disturb, and the vibration pattern is long-pulse.
+
+One thing to know when changing this: **Android notification channels are
+immutable after creation.** Editing importance, sound or audio routing on an
+existing channel is silently ignored so the user stays in control of their own
+settings. Changing any of it means publishing a new channel id — hence the
+`-v2` suffix on `ANDROID_CHANNEL_ID` — and deleting the old one. Bump the
+suffix whenever the channel config changes, or existing installs keep the old,
+quieter behaviour forever.
+
+On iOS the ceiling without a special entitlement is `timeSensitive`, which
+pierces Focus but still respects the silent switch. `critical` — which breaks
+through silent mode at a volume the app chooses — needs Apple's **Critical
+Alerts entitlement**, granted by application. The code is ready for it behind
+`IOS_CRITICAL_ALERTS_ENTITLED`; flip that in the same change that adds the
+approved entitlement.
+
+Still out of reach in Expo Go, and needing a development build: a **continuous
+ring until dismissed**, a **custom alarm sound**, and Android's **full-screen
+intent** that takes over the lock screen.
 
 ### Moving to true alarms later
 
@@ -220,18 +243,6 @@ cannot read it.
 > The Hindi and Tamil strings need a native-speaker and clinician review before
 > public launch, particularly the validation messages, where a misread message
 > could lead to a wrong schedule.
-
----
-
-## Medication catalogue
-
-`src/medications/catalogue.ts` bundles ~55 common Indian ophthalmic
-medications — glaucoma, lubricants, antibiotics, steroids, NSAIDs,
-anti-allergy, dilating and antiviral drops — with generic names, common Indian
-brand names and typical strengths.
-
-It is an autocomplete convenience, not a formulary. Free text is always
-accepted, and the prescription on the bottle always wins.
 
 ---
 

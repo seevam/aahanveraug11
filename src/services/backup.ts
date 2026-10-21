@@ -54,7 +54,7 @@ export async function buildBackup(): Promise<BackupFile> {
 
 function backupFileName(): string {
   const stamp = new Date().toISOString().slice(0, 10);
-  return `ahaan-eye-backup-${stamp}.json`;
+  return `eyedrop-scheduler-backup-${stamp}.json`;
 }
 
 export type ExportResult =
@@ -77,7 +77,7 @@ export async function exportBackup(): Promise<ExportResult> {
     if (canShare) {
       await Sharing.shareAsync(file.uri, {
         mimeType: 'application/json',
-        dialogTitle: 'Ahaan Eye backup',
+        dialogTitle: 'Eyedrop Scheduler backup',
         UTI: 'public.json',
       });
     }
@@ -242,7 +242,7 @@ export async function shareAdherenceText(patientId: string, text: string): Promi
   try {
     const patient = await patientRepo.get(patientId);
     const name = patient?.name.replace(/[^a-zA-Z0-9]/g, '-') ?? 'patient';
-    const file = new FileSystem.File(FileSystem.Paths.cache, `ahaan-eye-report-${name}.txt`);
+    const file = new FileSystem.File(FileSystem.Paths.cache, `eyedrop-scheduler-report-${name}.txt`);
     if (file.exists) file.delete();
     file.create();
     file.write(text);

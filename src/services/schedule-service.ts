@@ -20,9 +20,9 @@ import {
   DEFAULT_MAX_SHIFT_MINUTES,
   type ReminderSpec,
 } from '../scheduling/types';
-import { generateAll } from '../scheduling/engine';
+import { dropBeforeCutoff, generateAll } from '../scheduling/engine';
 import { resolveConflicts, type InfeasibleDay } from '../scheduling/conflict';
-import { addDays, localToUtc, todayIn } from '../scheduling/timezone';
+import { addDays, localToUtc, todayIn, utcToLocalMinute } from '../scheduling/timezone';
 import { doses as doseRepo, patients as patientRepo, reminders as reminderRepo } from '../db/repositories';
 import type { Patient, Reminder } from '../db/repositories';
 import {
@@ -89,9 +89,14 @@ export async function materialisePatient(
     maxShiftMinutes: DEFAULT_MAX_SHIFT_MINUTES,
   });
 
+  // Today only runs from now onward. Resolution above still saw the whole day,
+  // so spacing is computed against the morning doses even though they are not
+  // stored — see dropBeforeCutoff.
+  const upcoming = dropBeforeCutoff(resolved, fromDate, utcToLocalMinute(now, patient.timezone));
+
   const byId = new Map(active.map((r) => [r.id, r]));
 
-  const rows = resolved.flatMap((dose) => {
+  const rows = upcoming.flatMap((dose) => {
     const reminder = byId.get(dose.reminderId);
     if (!reminder) return [];
     return [
@@ -122,6 +127,7 @@ async function collectPrefs(allPatients: Patient[]): Promise<ReminderNotificatio
       prefs.set(reminder.id, {
         soundEnabled: reminder.soundEnabled,
         vibrateEnabled: reminder.vibrateEnabled,
+        patientName: patient.name,
       });
     }
   }

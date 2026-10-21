@@ -96,9 +96,11 @@ export const MINUTES_PER_DAY = 1440;
 
 /**
  * Ophthalmology guidance: consecutive drops need a gap or the second washes
- * out the first. Five minutes is the common minimum.
+ * out the first. Five minutes is the common published minimum; this app uses
+ * six, a deliberate minute of headroom so a patient who is slightly slow with
+ * the second bottle still clears the washout window.
  */
-export const DEFAULT_GAP_MINUTES = 5;
+export const DEFAULT_GAP_MINUTES = 6;
 
 /**
  * How far a dose may be pushed by conflict resolution before we stop and tell

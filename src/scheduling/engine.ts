@@ -224,3 +224,31 @@ export function generateAll(
       a.reminderId.localeCompare(b.reminderId),
   );
 }
+
+/**
+ * Drops doses that fall before a local cutoff.
+ *
+ * Without this, creating a reminder partway through the day back-fills the
+ * morning: "every hour from 08:00 to 19:00" set up at 16:00 would generate
+ * 08:00 through 15:00 as well, and the missed-dose sweep would immediately
+ * mark all eight as missed — doses the patient never had a chance to take, on
+ * a reminder that did not exist yet.
+ *
+ * The cutoff is applied *after* conflict resolution, not before, so the
+ * earlier times still take part in spacing. A dose at 08:00 that pushes a
+ * different drop to 08:06 should keep doing so even though neither will be
+ * stored today.
+ *
+ * Comparison is in local date + minute rather than epoch milliseconds to stay
+ * consistent with the rest of this module and sidestep DST entirely.
+ */
+export function dropBeforeCutoff<T extends { date: string; scheduledMinute: MinuteOfDay }>(
+  doses: T[],
+  cutoffDate: string,
+  cutoffMinute: MinuteOfDay,
+): T[] {
+  return doses.filter(
+    (dose) =>
+      dose.date > cutoffDate || (dose.date === cutoffDate && dose.scheduledMinute >= cutoffMinute),
+  );
+}

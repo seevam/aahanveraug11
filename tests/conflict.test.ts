@@ -38,7 +38,7 @@ describe('the 5-minute washout gap', () => {
       dose('a', 'Timolol', '08:00'),
       dose('b', 'Latanoprost', '08:00'),
     ]);
-    expect(at(resolved)).toEqual(['08:00', '08:05']);
+    expect(at(resolved)).toEqual(['08:00', '08:06']);
   });
 
   it('separates drops that are close but not identical', () => {
@@ -46,8 +46,8 @@ describe('the 5-minute washout gap', () => {
       dose('a', 'Timolol', '08:00'),
       dose('b', 'Latanoprost', '08:02'),
     ]);
-    expect(at(resolved)).toEqual(['08:00', '08:05']);
-    expect(resolved[1]?.shiftedByMinutes).toBe(3);
+    expect(at(resolved)).toEqual(['08:00', '08:06']);
+    expect(resolved[1]?.shiftedByMinutes).toBe(4);
   });
 
   it('cascades across four drops at the same time', () => {
@@ -57,7 +57,7 @@ describe('the 5-minute washout gap', () => {
       dose('c', 'Brimonidine', '08:00'),
       dose('d', 'Dorzolamide', '08:00'),
     ]);
-    expect(at(resolved)).toEqual(['08:00', '08:05', '08:10', '08:15']);
+    expect(at(resolved)).toEqual(['08:00', '08:06', '08:12', '08:18']);
   });
 
   it('preserves the order the patient asked for', () => {
@@ -67,7 +67,7 @@ describe('the 5-minute washout gap', () => {
       dose('third', 'C', '08:02'),
     ]);
     expect(resolved.map((d) => d.reminderId)).toEqual(['first', 'second', 'third']);
-    expect(at(resolved)).toEqual(['08:00', '08:05', '08:10']);
+    expect(at(resolved)).toEqual(['08:00', '08:06', '08:12']);
   });
 
   it('honours a custom gap', () => {
@@ -97,7 +97,7 @@ describe('the 5-minute washout gap', () => {
       dose('a', 'Timolol', '08:00'),
       dose('b', 'Timolol', '08:00'),
     ]);
-    expect(at(resolved)).toEqual(['08:00', '08:05']);
+    expect(at(resolved)).toEqual(['08:00', '08:06']);
   });
 });
 
@@ -107,20 +107,20 @@ describe('infeasible schedules', () => {
     const doses = Array.from({ length: 10 }, (_, i) => dose(`r${i}`, `Drug${i}`, '08:00'));
     const { resolved, infeasible } = resolveDay(doses, { maxShiftMinutes: 20 });
 
-    expect(resolved).toHaveLength(5); // 08:00, 08:05, 08:10, 08:15, 08:20
-    expect(infeasible).toHaveLength(5);
+    expect(resolved).toHaveLength(4); // 08:00, 08:06, 08:12, 08:18
+    expect(infeasible).toHaveLength(6);
     expect(infeasible[0]?.reason).toBe('shift-too-large');
-    expect(infeasible[0]?.medicationName).toBe('Drug5');
+    expect(infeasible[0]?.medicationName).toBe('Drug4');
   });
 
   it('reports a dose pushed past midnight rather than wrapping it', () => {
     const doses = [
-      dose('a', 'A', '23:56'),
-      dose('b', 'B', '23:56'),
-      dose('c', 'C', '23:56'),
+      dose('a', 'A', '23:55'),
+      dose('b', 'B', '23:55'),
+      dose('c', 'C', '23:55'),
     ];
     const { resolved, infeasible } = resolveDay(doses);
-    expect(at(resolved)).toEqual(['23:56']);
+    expect(at(resolved)).toEqual(['23:55']);
     expect(infeasible.map((i) => i.reason)).toEqual(['past-midnight', 'past-midnight']);
   });
 
@@ -145,7 +145,7 @@ describe('resolution across days', () => {
       dose('b', 'B', '08:00', '2026-08-11'),
     ];
     const { resolved } = resolveConflicts(doses);
-    expect(at(resolved)).toEqual(['08:00', '08:05', '08:00', '08:05']);
+    expect(at(resolved)).toEqual(['08:00', '08:06', '08:00', '08:06']);
   });
 
   it('never shifts a dose across a midnight boundary into the next day', () => {
@@ -210,12 +210,12 @@ describe('end to end: a realistic glaucoma regimen', () => {
     const { resolved, infeasible } = resolveConflicts(generated);
 
     expect(infeasible).toHaveLength(0);
-    expect(at(resolved)).toEqual(['08:00', '08:05', '20:00', '20:05', '20:10']);
+    expect(at(resolved)).toEqual(['08:00', '08:06', '20:00', '20:06', '20:12']);
 
     // Every pair of adjacent doses is at least 5 minutes apart.
     for (let i = 1; i < resolved.length; i += 1) {
       const gap = resolved[i]!.scheduledMinute - resolved[i - 1]!.scheduledMinute;
-      expect(gap).toBeGreaterThanOrEqual(5);
+      expect(gap).toBeGreaterThanOrEqual(6);
     }
   });
 });

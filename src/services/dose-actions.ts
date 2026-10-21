@@ -4,7 +4,12 @@
  * identically.
  */
 
-import { doses as doseRepo, reminders as reminderRepo, type Dose } from '../db/repositories';
+import {
+  doses as doseRepo,
+  patients as patientRepo,
+  reminders as reminderRepo,
+  type Dose,
+} from '../db/repositories';
 import { cancelDose, scheduleSnooze } from '../notifications/service';
 
 export type DoseActionResult =
@@ -51,9 +56,14 @@ export async function snooze(doseId: string): Promise<DoseActionResult> {
 
   await cancelDose(dose);
 
+  // Carry the profile name through, or the snoozed alarm comes back without
+  // the one piece of context a caregiver needs to act on it.
+  const patient = await patientRepo.get(dose.patientId);
+
   const { scheduledAt, notificationId } = await scheduleSnooze(dose, snoozeMinutes, {
     soundEnabled: reminder?.soundEnabled ?? true,
     vibrateEnabled: reminder?.vibrateEnabled ?? true,
+    patientName: patient?.name ?? '',
   });
 
   await doseRepo.setStatus(doseId, 'snoozed', {

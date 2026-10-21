@@ -116,7 +116,7 @@ export default function ReportsScreen() {
     setSharing(true);
     try {
       const lines = [
-        `Ahaan Eye — adherence report`,
+        `Eyedrop Scheduler — adherence report`,
         `Patient: ${patient.name}`,
         `Period: last ${range} days`,
         '',

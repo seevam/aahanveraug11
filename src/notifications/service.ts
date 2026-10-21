@@ -24,6 +24,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { doses as doseRepo, type Dose } from '../db/repositories';
+import { allocateFairly } from './allocation';
 
 /**
  * How many notifications we keep armed at once. iOS hard-caps at 64; we leave
@@ -31,8 +32,35 @@ import { doses as doseRepo, type Dose } from '../db/repositories';
  */
 export const NOTIFICATION_BUDGET = 56;
 
-export const ANDROID_CHANNEL_ID = 'dose-reminders';
+/**
+ * Android notification channels are immutable after creation: importance,
+ * sound and audio routing are frozen, and later edits are silently ignored so
+ * the user stays in control of their own settings. Changing any of those means
+ * publishing a NEW channel id and deleting the old one — which is why this has
+ * a version suffix. Bump it whenever the channel configuration below changes,
+ * or existing installs keep the old behaviour forever.
+ */
+export const ANDROID_CHANNEL_ID = 'dose-alarms-v2';
+const LEGACY_ANDROID_CHANNEL_IDS = ['dose-reminders'];
+
 export const DOSE_CATEGORY_ID = 'dose-reminder';
+
+/**
+ * Vibration strong enough to wake someone: long pulses, repeated.
+ * Shared by the channel and by individual notifications.
+ */
+const ALARM_VIBRATION_PATTERN = [0, 800, 400, 800, 400, 800];
+
+/**
+ * iOS `critical` breaks through the silent switch and Focus at a volume the
+ * app chooses — but it needs Apple's Critical Alerts entitlement, granted by
+ * application, and a build that declares it. Requesting it without the
+ * entitlement gets the notification rejected, so until that is approved the
+ * ceiling is `timeSensitive`, which still pierces Focus.
+ *
+ * Flip this to true in the same change that adds the approved entitlement.
+ */
+const IOS_CRITICAL_ALERTS_ENTITLED = false;
 
 /** How long after a scheduled time a dose stays actionable before it is missed. */
 export const MISSED_GRACE_MINUTES = 30;
@@ -55,15 +83,33 @@ export async function configure(): Promise<void> {
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL_ID, {
-      name: 'Dose reminders',
-      description: 'Alerts when it is time for an eye drop.',
+      name: 'Dose alarms',
+      description: 'Rings when an eye drop is due.',
       importance: Notifications.AndroidImportance.MAX,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-      vibrationPattern: [0, 400, 200, 400],
+      vibrationPattern: ALARM_VIBRATION_PATTERN,
       enableVibrate: true,
-      bypassDnd: false,
+      // Ring through Do Not Disturb. Android only honours this once the user
+      // grants notification-policy access; without it the flag is ignored
+      // rather than rejected, so asking costs nothing.
+      bypassDnd: true,
       sound: 'default',
+      // The part that makes this loud rather than merely urgent. Routing the
+      // channel to the ALARM stream means it plays at the phone's *alarm*
+      // volume — the one people keep turned up to wake themselves — instead of
+      // notification volume, and it is not muted by the ringer switch.
+      // enforceAudibility asks the system to make it heard over other audio.
+      audioAttributes: {
+        usage: Notifications.AndroidAudioUsage.ALARM,
+        contentType: Notifications.AndroidAudioContentType.SONIFICATION,
+        flags: { enforceAudibility: true, requestHardwareAudioVideoSynchronization: false },
+      },
     });
+
+    // Retire superseded channels so the old, quieter settings cannot linger.
+    for (const legacy of LEGACY_ANDROID_CHANNEL_IDS) {
+      await Notifications.deleteNotificationChannelAsync(legacy).catch(() => {});
+    }
   }
 
   await Notifications.setNotificationCategoryAsync(DOSE_CATEGORY_ID, [
@@ -117,27 +163,46 @@ function body(dose: Dose): string {
 }
 
 /**
+ * Whose dose this is, first, then what it is.
+ *
+ * A caregiver managing two people sees these on a lock screen with no other
+ * context, so the profile name leads: acting on the wrong person's reminder is
+ * the mistake worth designing against. Single-profile users see their own name
+ * here too, which is a small cost for never being ambiguous.
+ */
+function title(dose: Dose, patientName: string): string {
+  return patientName ? `${patientName} — ${dose.medicationName}` : dose.medicationName;
+}
+
+export type DoseAlarmOptions = {
+  soundEnabled: boolean;
+  vibrateEnabled: boolean;
+  /** Shown first in the notification title. */
+  patientName: string;
+};
+
+/**
  * Arms a single dose. Returns the platform notification id, or null when the
  * dose is already in the past (nothing to schedule).
  */
 export async function scheduleDose(
   dose: Dose,
-  options: { soundEnabled: boolean; vibrateEnabled: boolean },
+  options: DoseAlarmOptions,
 ): Promise<string | null> {
   if (dose.scheduledAt <= Date.now()) return null;
 
   return Notifications.scheduleNotificationAsync({
     content: {
-      title: dose.medicationName,
+      title: title(dose, options.patientName),
       body: body(dose),
       data: { doseId: dose.id, patientId: dose.patientId },
       categoryIdentifier: DOSE_CATEGORY_ID,
       sound: options.soundEnabled ? 'default' : undefined,
-      vibrate: options.vibrateEnabled ? [0, 400, 200, 400] : undefined,
-      // iOS: raises the notification above normal delivery and lets it
-      // through Focus. The nearest thing iOS offers to an alarm without the
-      // Critical Alerts entitlement, which requires Apple approval.
-      interruptionLevel: 'timeSensitive',
+      vibrate: options.vibrateEnabled ? ALARM_VIBRATION_PATTERN : undefined,
+      // `critical` pierces the silent switch and Focus, but only with Apple's
+      // entitlement; `timeSensitive` is the strongest level available without
+      // it and still breaks through Focus.
+      interruptionLevel: IOS_CRITICAL_ALERTS_ENTITLED ? 'critical' : 'timeSensitive',
       ...(Platform.OS === 'android' ? { channelId: ANDROID_CHANNEL_ID } : {}),
     },
     trigger: {
@@ -162,19 +227,21 @@ export async function cancelAll(): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
-export type ReminderNotificationPrefs = Map<
-  string,
-  { soundEnabled: boolean; vibrateEnabled: boolean }
->;
+/** Per-reminder alarm settings plus the profile the reminder belongs to. */
+export type ReminderNotificationPrefs = Map<string, DoseAlarmOptions>;
 
 /**
  * Rebuilds the rolling window.
  *
- * Cancels everything currently armed and re-arms the soonest
- * `NOTIFICATION_BUDGET` unresolved doses. Cancel-then-rearm rather than a diff
- * because the set is small, the operation is idempotent, and a diff that drifts
- * out of sync would silently stop reminding a patient — the one failure this
- * app must not have.
+ * Cancels everything currently armed and re-arms a fair slice of the soonest
+ * unresolved doses, across every profile on the device. Cancel-then-rearm
+ * rather than a diff because the set is small, the operation is idempotent,
+ * and a diff that drifts out of sync would silently stop reminding a patient
+ * — the one failure this app must not have.
+ *
+ * Note that this is deliberately profile-agnostic: it arms doses for everyone,
+ * not just whoever is currently selected in the UI. Switching profiles is a
+ * view change and must never silence another profile's alarms.
  */
 export async function refreshScheduledNotifications(
   prefs: ReminderNotificationPrefs,
@@ -188,14 +255,19 @@ export async function refreshScheduledNotifications(
 
   await Notifications.cancelAllScheduledNotificationsAsync();
 
-  // One extra so we can tell whether we hit the cap.
-  const upcoming = await doseRepo.upcoming(NOTIFICATION_BUDGET + 1);
-  const truncated = upcoming.length > NOTIFICATION_BUDGET;
-  const window = upcoming.slice(0, NOTIFICATION_BUDGET);
+  // Pull a pool wider than the budget so the fair split has something to
+  // choose between; one extra tells us whether anything was left out.
+  const pool = await doseRepo.upcoming(NOTIFICATION_BUDGET * 4 + 1);
+  const window = allocateFairly(pool, NOTIFICATION_BUDGET);
+  const truncated = pool.length > window.length;
 
   let scheduled = 0;
   for (const dose of window) {
-    const pref = prefs.get(dose.reminderId) ?? { soundEnabled: true, vibrateEnabled: true };
+    const pref = prefs.get(dose.reminderId) ?? {
+      soundEnabled: true,
+      vibrateEnabled: true,
+      patientName: '',
+    };
     try {
       const id = await scheduleDose(dose, pref);
       await doseRepo.setNotificationId(dose.id, id);
@@ -213,7 +285,7 @@ export async function refreshScheduledNotifications(
 export async function scheduleSnooze(
   dose: Dose,
   minutes: number,
-  options: { soundEnabled: boolean; vibrateEnabled: boolean },
+  options: DoseAlarmOptions,
 ): Promise<{ scheduledAt: number; notificationId: string | null }> {
   const scheduledAt = Date.now() + minutes * 60_000;
   const id = await scheduleDose({ ...dose, scheduledAt }, options);
@@ -243,3 +315,5 @@ export function addReceivedListener(
 }
 
 export const DEFAULT_ACTION = Notifications.DEFAULT_ACTION_IDENTIFIER;
+
+export { allocateFairly } from './allocation';

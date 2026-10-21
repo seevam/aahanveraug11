@@ -12,7 +12,7 @@
 
 const en = {
   common: {
-    appName: 'Ahaan Eye',
+    appName: 'Eyedrop Scheduler',
     tagline: 'Impact an eye every day',
     save: 'Save',
     cancel: 'Cancel',
@@ -35,7 +35,7 @@ const en = {
   onboarding: {
     welcomeTitle: 'Never miss a drop',
     welcomeBody:
-      'Ahaan Eye keeps track of every eye drop, spaces them correctly, and reminds you when it is time.',
+      'Eyedrop Scheduler keeps track of every eye drop, spaces them correctly, and reminds you when it is time.',
     getStarted: 'Get started',
     profileTitle: 'Who are these drops for?',
     profileBody: 'You can add more people later — a parent, a partner, or yourself.',
@@ -47,7 +47,7 @@ const en = {
     medicationBody: 'You can skip this and add medications later.',
     notificationsTitle: 'Turn on reminders',
     notificationsBody:
-      'Ahaan Eye needs permission to alert you when a dose is due. Without it, reminders cannot reach you.',
+      'Eyedrop Scheduler needs permission to alert you when a dose is due. Without it, reminders cannot reach you.',
     notificationsEnable: 'Turn on reminders',
     notificationsLater: 'Not now',
     notificationsDenied:
@@ -115,7 +115,7 @@ const en = {
   form: {
     medication: 'Medication',
     medicationPlaceholder: 'Type a name or brand',
-    medicationHint: 'Start typing — we will suggest matching eye drops.',
+    medicationHint: 'Type the name exactly as it appears on the bottle.',
     medicationFreeText: 'Use “{{name}}”',
     dosage: 'Dosage',
     dosagePlaceholder: 'e.g. 1 drop',
@@ -219,7 +219,7 @@ const en = {
 
   security: {
     title: 'App lock',
-    description: 'Require a PIN before opening Ahaan Eye. Your medication history is health data.',
+    description: 'Require a PIN before opening Eyedrop Scheduler. Your medication history is health data.',
     enable: 'Turn on app lock',
     disable: 'Turn off app lock',
     setPin: 'Choose a 4-digit PIN',
@@ -228,7 +228,7 @@ const en = {
     unlockTitle: 'Enter your PIN',
     wrongPin: 'Incorrect PIN.',
     useBiometric: 'Use biometrics',
-    biometricPrompt: 'Unlock Ahaan Eye',
+    biometricPrompt: 'Unlock Eyedrop Scheduler',
     biometricUnavailable: 'Biometrics are not set up on this phone.',
   },
 
@@ -244,13 +244,14 @@ const en = {
     importWarningBody:
       'This replaces everything currently in the app — all people, reminders and dose history.',
     importSuccess: 'Restored {{patients}} people and {{reminders}} reminders.',
-    importFailed: 'That file could not be read as an Ahaan Eye backup.',
+    importFailed: 'That file could not be read as an Eyedrop Scheduler backup.',
     importVersionMismatch: 'That backup was made by a newer version of the app.',
     lastBackup: 'Last backup: {{date}}',
     neverBackedUp: 'You have not made a backup yet.',
   },
 
   alarm: {
+    forPerson: 'For {{name}}',
     timeFor: 'Time for',
     taken: 'Taken',
     snooze: 'Snooze {{minutes}} min',
@@ -304,7 +305,7 @@ const en = {
     step10: 'Wipe away anything that runs down with a clean tissue, then put the cap back on.',
     gapHeading: 'Leave a gap between different drops',
     gapBody:
-      'Wait at least {{minutes}} minutes before a different drop, or the second one washes the first out. Ahaan Eye already spaces your reminders for you, so just follow the times it gives you.',
+      'Wait at least {{minutes}} minutes before a different drop, or the second one washes the first out. Eyedrop Scheduler already spaces your reminders for you, so just follow the times it gives you.',
     tipsHeading: 'Worth knowing',
     tip1: 'One drop is enough. Your eye cannot hold more than one, so a second is wasted.',
     tip2:

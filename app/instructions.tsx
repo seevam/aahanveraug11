@@ -7,7 +7,6 @@ import { Card, EmojiIcon, Row, Screen, SectionHeading, Spacer, Text } from '../s
 import { Button } from '../src/components/Button';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { capColours } from '../src/theme/tokens';
-import type { CapColour, MedicationClass } from '../src/medications/catalogue';
 import { DEFAULT_GAP_MINUTES } from '../src/scheduling/types';
 
 /**
@@ -32,12 +31,12 @@ const TIP_COUNT = 6;
  * lubricants, anti-allergy drops and antivirals have no assigned colour, so
  * listing them would imply a rule that does not exist.
  */
-const CAP_COLOUR_LEGEND: Array<{ colour: CapColour; classKey: MedicationClass }> = [
+const CAP_COLOUR_LEGEND = [
   { colour: 'teal', classKey: 'glaucoma' },
   { colour: 'pink', classKey: 'steroid' },
   { colour: 'tan', classKey: 'antibiotic' },
   { colour: 'red', classKey: 'mydriatic' },
-];
+] as const;
 
 function Step({ number, text }: { number: number; text: string }) {
   const theme = useTheme();

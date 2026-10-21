@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -17,8 +17,6 @@ import {
   TimeList,
   ToggleRow,
 } from './inputs';
-import { searchMedications, type MedicationMatch } from '../medications/catalogue';
-import { CapSwatch } from './CapSwatch';
 import { hhmmToMinutes, minutesForConfig, minutesToHHMM, validateReminder } from '../scheduling/engine';
 import { previewSchedule } from '../services/schedule-service';
 import { todayIn } from '../scheduling/timezone';
@@ -170,77 +168,6 @@ function CountFields({
   );
 }
 
-function MedicationPicker({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (name: string, medicationId: string | null, strength?: string) => void;
-}) {
-  const theme = useTheme();
-  const { t } = useTranslation();
-  const [query, setQuery] = useState(value);
-  const [focused, setFocused] = useState(false);
-
-  const matches: MedicationMatch[] = useMemo(
-    () => (focused && query.trim().length >= 2 ? searchMedications(query) : []),
-    [query, focused],
-  );
-
-  return (
-    <View>
-      <TextField
-        value={query}
-        onChangeText={(v) => {
-          setQuery(v);
-          setFocused(true);
-          // Free text is always valid — the catalogue only assists.
-          onChange(v, null);
-        }}
-        placeholder={t('form.medicationPlaceholder')}
-        accessibilityLabel={t('form.medication')}
-      />
-
-      {matches.length > 0 ? (
-        <Card style={{ marginTop: theme.spacing.sm, padding: theme.spacing.sm }}>
-          {matches.map((match) => (
-            <Pressable
-              key={match.entry.id}
-              onPress={() => {
-                setQuery(match.entry.generic);
-                setFocused(false);
-                onChange(match.entry.generic, match.entry.id, match.entry.strengths[0]);
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={`${match.matchedOn}, ${match.entry.generic}`}
-              style={({ pressed }) => ({
-                minHeight: theme.touchTarget.min,
-                justifyContent: 'center',
-                paddingHorizontal: theme.spacing.md,
-                paddingVertical: theme.spacing.sm,
-                borderRadius: theme.radius.sm,
-                backgroundColor: pressed ? theme.colors.surfaceSunken : 'transparent',
-              })}
-            >
-              <Row style={{ gap: theme.spacing.sm }}>
-                <CapSwatch medicationId={match.entry.id} />
-                <Text variant="body" style={{ flex: 1 }}>
-                  {match.viaBrand ? `${match.matchedOn} · ` : ''}
-                  {match.entry.generic}
-                </Text>
-              </Row>
-              <Text variant="caption" tone="muted">
-                {t(`medicationClass.${match.entry.medicationClass}`)}
-                {match.entry.strengths.length > 0 ? ` · ${match.entry.strengths.join(', ')}` : ''}
-              </Text>
-            </Pressable>
-          ))}
-        </Card>
-      ) : null}
-    </View>
-  );
-}
-
 export function ReminderForm({
   value,
   onChange,
@@ -332,15 +259,11 @@ export function ReminderForm({
         hint={t('form.medicationHint')}
         error={showIssues && nameMissing ? t('validation.medicationRequired') : undefined}
       >
-        <MedicationPicker
+        <TextField
           value={value.medicationName}
-          onChange={(name, medicationId, strength) =>
-            patch({
-              medicationName: name,
-              medicationId,
-              dosage: strength && value.dosage === '1 drop' ? `1 drop (${strength})` : value.dosage,
-            })
-          }
+          onChangeText={(medicationName) => patch({ medicationName })}
+          placeholder={t('form.medicationPlaceholder')}
+          accessibilityLabel={t('form.medication')}
         />
       </Field>
 
