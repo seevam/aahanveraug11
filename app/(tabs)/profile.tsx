@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Linking, View } from 'react-native';
+import { Alert, Linking, Platform, View } from 'react-native';
 import Constants from 'expo-constants';
 import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -239,6 +239,29 @@ export default function ProfileScreen() {
           </>
         ) : null}
       </Card>
+
+      {/* Android 14+ does not pre-grant exact alarms, and we deliberately do
+          not claim USE_EXACT_ALARM (Google restricts it to alarm-clock and
+          calendar apps). So tell the patient how to grant it rather than
+          letting their doses quietly drift by several minutes. */}
+      {Platform.OS === 'android' ? (
+        <>
+          <Spacer size="md" />
+          <Card>
+            <Text variant="bodyStrong">{t('profile.exactAlarms')}</Text>
+            <Spacer size="sm" />
+            <Text variant="caption" tone="muted">
+              {t('profile.exactAlarmsBody')}
+            </Text>
+            <Spacer size="md" />
+            <Button
+              label={t('profile.openSystemSettings')}
+              variant="secondary"
+              onPress={() => void Linking.openSettings()}
+            />
+          </Card>
+        </>
+      ) : null}
 
       {/* ------------------------------------------------------------- learn */}
       <SectionHeading>{t('instructions.title')}</SectionHeading>

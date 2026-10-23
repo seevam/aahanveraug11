@@ -246,6 +246,20 @@ cannot read it.
 
 ---
 
+## Publishing
+
+- Privacy policy: [`PRIVACY.md`](PRIVACY.md), with a hosted copy in
+  [`docs/`](docs/index.html) for GitHub Pages — Google Play requires a public
+  URL for it.
+- Application id is **`com.eyedropscheduler.app`** on both platforms. This is
+  permanent once the app is published to either store; it cannot be renamed or
+  reused afterwards.
+- `USE_EXACT_ALARM` is deliberately **not** requested. It is auto-granted and
+  cannot be revoked, which is why Google restricts it to apps whose core
+  purpose is an alarm clock or calendar. The app asks for
+  `SCHEDULE_EXACT_ALARM` instead, which the user grants, and the Profile screen
+  tells Android users how to grant it so reminders are not delayed.
+
 ## Not built
 
 Carried over from the product plan and deliberately out of scope here:

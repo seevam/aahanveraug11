@@ -1,18 +1,18 @@
 {
   "expo": {
     "name": "Eyedrop Scheduler",
-    "slug": "ahaan-eye",
+    "slug": "eyedrop-scheduler",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "ahaaneye",
+    "scheme": "eyedropscheduler",
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ahaaneye.app",
+      "bundleIdentifier": "com.eyedropscheduler.app",
       "infoPlist": {
         "NSFaceIDUsageDescription": "Eyedrop Scheduler uses Face ID to unlock your medication history.",
         "UIBackgroundModes": [
@@ -24,7 +24,7 @@
       }
     },
     "android": {
-      "package": "com.ahaaneye.app",
+      "package": "com.eyedropscheduler.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
@@ -35,10 +35,7 @@
         "POST_NOTIFICATIONS",
         "VIBRATE",
         "SCHEDULE_EXACT_ALARM",
-        "USE_EXACT_ALARM",
         "RECEIVE_BOOT_COMPLETED",
-        "USE_BIOMETRIC",
-        "USE_FINGERPRINT",
         "ACCESS_NOTIFICATION_POLICY"
       ]
     },
@@ -67,7 +64,7 @@
         "expo-notifications",
         {
           "color": "#0E7C7B",
-          "defaultChannel": "dose-reminders"
+          "defaultChannel": "dose-alarms-v2"
         }
       ],
       [
