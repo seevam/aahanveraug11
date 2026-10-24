@@ -25,6 +25,7 @@ import { resolveConflicts, type InfeasibleDay } from '../scheduling/conflict';
 import { addDays, localToUtc, todayIn, utcToLocalMinute } from '../scheduling/timezone';
 import { doses as doseRepo, patients as patientRepo, reminders as reminderRepo } from '../db/repositories';
 import type { Patient, Reminder } from '../db/repositories';
+import { getAlarmStyle } from './clock-alarms';
 import {
   MISSED_GRACE_MINUTES,
   refreshScheduledNotifications,
@@ -121,6 +122,7 @@ export async function materialisePatient(
 /** Notification preferences keyed by reminder, for the rolling window. */
 async function collectPrefs(allPatients: Patient[]): Promise<ReminderNotificationPrefs> {
   const prefs: ReminderNotificationPrefs = new Map();
+  const ringsInClock = (await getAlarmStyle()) === 'clock';
   for (const patient of allPatients) {
     const list = await reminderRepo.listForPatient(patient.id);
     for (const reminder of list) {
@@ -128,6 +130,7 @@ async function collectPrefs(allPatients: Patient[]): Promise<ReminderNotificatio
         soundEnabled: reminder.soundEnabled,
         vibrateEnabled: reminder.vibrateEnabled,
         patientName: patient.name,
+        ringsInClock,
       });
     }
   }

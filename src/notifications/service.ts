@@ -48,6 +48,7 @@ import { startActivityAsync } from 'expo-intent-launcher';
 import { Platform } from 'react-native';
 
 import { doses as doseRepo, type Dose } from '../db/repositories';
+import i18n from '../i18n';
 import { allocateFairly } from './allocation';
 import { ALARM_VIBRATION_PATTERN } from './alarm-pattern';
 import alarmChannels from './alarm-channels.json';
@@ -167,9 +168,10 @@ export async function requestPermission(): Promise<PermissionState> {
 /**
  * Opens the system screen where the user allows exact alarms.
  *
- * Android 14+ does not pre-grant this, and we deliberately do not claim
- * USE_EXACT_ALARM (Google restricts it to alarm-clock and calendar apps). An
- * alarm the system is free to delay is not an alarm, so the app asks.
+ * The sideloaded APK declares USE_EXACT_ALARM, which Android grants at
+ * install, so this is normally already allowed. It is kept for a Play build:
+ * Google restricts USE_EXACT_ALARM to alarm-clock and calendar apps, and
+ * without it Android 14+ starts with exact alarms off. See README.
  */
 export async function openAlarmSettings(): Promise<void> {
   if (Platform.OS !== 'android') return;
@@ -245,6 +247,15 @@ export async function openFullScreenAlarmSettings(): Promise<void> {
   }
 }
 
+/**
+ * A translated button label. A snooze pressed while the app is closed re-arms
+ * the alarm from the background handler, before i18n has been initialised —
+ * where `t` would return the raw key — so English is the fallback there.
+ */
+function label(key: string, fallback: string): string {
+  return i18n.isInitialized ? i18n.t(key) : fallback;
+}
+
 function body(dose: Dose): string {
   const eye = dose.eye === 'both' ? 'both eyes' : dose.eye === 'left' ? 'left eye' : 'right eye';
   return `${dose.dosage} — ${eye}`;
@@ -266,6 +277,12 @@ export type DoseAlarmOptions = {
   vibrateEnabled: boolean;
   /** Shown first in the alarm title. */
   patientName: string;
+  /**
+   * The phone's Clock app does the ringing (see `src/services/clock-alarms.ts`),
+   * so this becomes a silent, dismissible notification that only exists to
+   * record Taken / Skip. Ringing here as well would sound every dose twice.
+   */
+  ringsInClock: boolean;
 };
 
 /** Per-reminder alarm settings plus the profile the reminder belongs to. */
@@ -275,6 +292,7 @@ const DEFAULT_ALARM_OPTIONS: DoseAlarmOptions = {
   soundEnabled: true,
   vibrateEnabled: true,
   patientName: '',
+  ringsInClock: false,
 };
 
 /**
@@ -307,6 +325,10 @@ export async function scheduleDose(
 
   await configure();
   const type = alarmType ?? (await strongestAlarmType());
+  // In Clock mode the Clock app rings; this is only the Taken / Skip record.
+  const rings = !options.ringsInClock;
+  const sound = rings && options.soundEnabled;
+  const vibrate = rings && options.vibrateEnabled;
 
   return notifee.createTriggerNotification(
     {
@@ -317,23 +339,23 @@ export async function scheduleDose(
       body: body(dose),
       data: { doseId: dose.id, patientId: dose.patientId },
       android: {
-        channelId: alarmChannelId(options.soundEnabled, options.vibrateEnabled),
-        category: AndroidCategory.ALARM,
+        channelId: alarmChannelId(sound, vibrate),
+        category: rings ? AndroidCategory.ALARM : AndroidCategory.REMINDER,
         importance: AndroidImportance.HIGH,
         visibility: AndroidVisibility.PUBLIC,
         smallIcon: 'ic_launcher',
         // The four properties that make this an alarm rather than a banner.
-        fullScreenAction: { id: 'dose-alarm', launchActivity: 'default' },
-        loopSound: options.soundEnabled,
-        ongoing: true,
+        ...(rings ? { fullScreenAction: { id: 'dose-alarm', launchActivity: 'default' } } : {}),
+        loopSound: sound,
+        ongoing: rings,
         autoCancel: false,
-        sound: options.soundEnabled ? ALARM_SOUND_ANDROID : undefined,
-        vibrationPattern: options.vibrateEnabled ? ALARM_VIBRATION_PATTERN : undefined,
+        sound: sound ? ALARM_SOUND_ANDROID : undefined,
+        vibrationPattern: vibrate ? ALARM_VIBRATION_PATTERN : undefined,
         pressAction: { id: 'default', launchActivity: 'default' },
         actions: [
-          { title: 'Taken', pressAction: { id: 'taken' } },
-          { title: 'Snooze', pressAction: { id: 'snooze' } },
-          { title: 'Skip', pressAction: { id: 'skip' } },
+          { title: label('alarm.taken', 'Taken'), pressAction: { id: 'taken' } },
+          { title: label('today.snooze', 'Snooze'), pressAction: { id: 'snooze' } },
+          { title: label('common.skip', 'Skip'), pressAction: { id: 'skip' } },
         ],
       },
       ios: {

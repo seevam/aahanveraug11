@@ -16,6 +16,7 @@ import {
 import { Button, PressableRow, StatusPill } from '../../src/components/Button';
 import { Field, Segmented, TextField, ToggleRow } from '../../src/components/inputs';
 import { ImpactCard } from '../../src/components/ImpactCard';
+import { ClockAlarmsCard } from '../../src/components/ClockAlarmsCard';
 import { Avatar } from '../../src/components/PatientSwitcher';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAppStore } from '../../src/stores/app-store';
@@ -34,6 +35,12 @@ import {
   requestPermission,
 } from '../../src/notifications/service';
 import { backupStats, exportBackup, importBackup } from '../../src/services/backup';
+import {
+  getAlarmStyle,
+  isClockAvailable,
+  setAlarmStyle,
+  type AlarmStyle,
+} from '../../src/services/clock-alarms';
 import {
   disableLock,
   isBiometricAvailable,
@@ -63,6 +70,8 @@ export default function ProfileScreen() {
   const [exactAlarms, setExactAlarms] = useState<boolean | null>(null);
   const [battery, setBattery] = useState<boolean | null>(null);
   const [manufacturerPower, setManufacturerPower] = useState(false);
+  const [alarmStyle, setAlarmStyleState] = useState<AlarmStyle>('app');
+  const clockAvailable = isClockAvailable();
 
   // PIN entry, shown inline when the patient turns the lock on.
   const [pinStage, setPinStage] = useState<'idle' | 'set' | 'confirm'>('idle');
@@ -78,6 +87,7 @@ export default function ProfileScreen() {
     setExactAlarms(await exactAlarmsAllowed().catch(() => null));
     setBattery(await batteryOptimised().catch(() => null));
     setManufacturerPower(await hasManufacturerPowerSettings().catch(() => false));
+    setAlarmStyleState(await getAlarmStyle());
     await refreshPermission();
   }, [refreshPermission]);
 
@@ -95,6 +105,14 @@ export default function ProfileScreen() {
     });
     return () => subscription.remove();
   }, [load]);
+
+  async function changeAlarmStyle(next: AlarmStyle) {
+    await setAlarmStyle(next);
+    setAlarmStyleState(next);
+    // Re-arm everything: in Clock mode the app's own alarms go silent, and
+    // switching back makes them ring again.
+    await sync();
+  }
 
   async function handlePinSubmit() {
     if (pin.length !== 4) return;
@@ -274,9 +292,39 @@ export default function ProfileScreen() {
         <>
           <SectionHeading>{t('profile.alarmSetup')}</SectionHeading>
 
+          {/* Clock mode hands the ringing to the phone's own Clock app; see
+              src/services/clock-alarms.ts. Offered only where a Clock app
+              accepts alarms from other apps. */}
+          {clockAvailable ? (
+            <>
+              <Text variant="bodyStrong">{t('profile.ringWith')}</Text>
+              <Spacer size="sm" />
+              <Segmented
+                value={alarmStyle}
+                onChange={(next) => void changeAlarmStyle(next)}
+                options={[
+                  { value: 'clock', label: t('profile.ringWithClock') },
+                  { value: 'app', label: t('profile.ringWithApp') },
+                ]}
+              />
+              <Spacer size="sm" />
+              <Text variant="caption" tone="muted">
+                {alarmStyle === 'clock' ? t('profile.ringWithClockBody') : t('profile.ringWithAppBody')}
+              </Text>
+              <Spacer size="md" />
+              {alarmStyle === 'clock' ? (
+                <>
+                  <ClockAlarmsCard />
+                  <Spacer size="md" />
+                </>
+              ) : null}
+            </>
+          ) : null}
+
           {/* Without this grant, alarms still fire but may be minutes late:
-              see strongestAlarmType in service.ts. We deliberately do not
-              claim USE_EXACT_ALARM, which Google reserves for clock apps. */}
+              see strongestAlarmType in service.ts. USE_EXACT_ALARM in
+              app.json normally pre-grants it; the step stays for builds
+              without it (see README). */}
           <SetupStep
             title={t('profile.exactAlarms')}
             body={t('profile.exactAlarmsBody')}
@@ -286,7 +334,7 @@ export default function ProfileScreen() {
 
           {/* Android 14+ grants full-screen alarms only to apps the user
               allows, and offers no reliable way to read that back from JS. */}
-          {NEEDS_FULL_SCREEN_GRANT ? (
+          {NEEDS_FULL_SCREEN_GRANT && alarmStyle === 'app' ? (
             <SetupStep
               title={t('profile.fullScreenAlarms')}
               body={t('profile.fullScreenAlarmsBody')}
@@ -294,11 +342,13 @@ export default function ProfileScreen() {
             />
           ) : null}
 
-          <SetupStep
-            title={t('profile.alarmSound')}
-            body={t('profile.alarmSoundBody')}
-            onPress={() => void openAlarmSoundSettings()}
-          />
+          {alarmStyle === 'app' ? (
+            <SetupStep
+              title={t('profile.alarmSound')}
+              body={t('profile.alarmSoundBody')}
+              onPress={() => void openAlarmSoundSettings()}
+            />
+          ) : null}
 
           <SetupStep
             title={t('profile.battery')}
@@ -315,9 +365,11 @@ export default function ProfileScreen() {
             />
           ) : null}
 
-          <Text variant="caption" tone="muted">
-            {t('profile.alarmVolumeHint')}
-          </Text>
+          {alarmStyle === 'app' ? (
+            <Text variant="caption" tone="muted">
+              {t('profile.alarmVolumeHint')}
+            </Text>
+          ) : null}
         </>
       ) : null}
 

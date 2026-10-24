@@ -15,6 +15,8 @@ import { markSkipped, markTaken, snooze, undoAction } from '../../src/services/d
 import { minutesToHHMM } from '../../src/scheduling/engine';
 import { todayIn, utcToLocalMinute } from '../../src/scheduling/timezone';
 import { batteryOptimised, exactAlarmsAllowed } from '../../src/notifications/service';
+import { getAlarmStyle } from '../../src/services/clock-alarms';
+import { ClockAlarmsCard } from '../../src/components/ClockAlarmsCard';
 
 export default function TodayScreen() {
   const theme = useTheme();
@@ -31,6 +33,7 @@ export default function TodayScreen() {
   // Only the settings Android lets us read back. A fresh install on Android
   // 14+ starts with exact alarms off, so this is what most new users will see.
   const [alarmsNeedSetup, setAlarmsNeedSetup] = useState(false);
+  const [ringsInClock, setRingsInClock] = useState(false);
 
   const load = useCallback(async () => {
     if (!patient) {
@@ -46,6 +49,7 @@ export default function TodayScreen() {
       batteryOptimised().catch(() => null),
     ]);
     setAlarmsNeedSetup(exact === false || battery === true);
+    setRingsInClock((await getAlarmStyle()) === 'clock');
   }, [patient]);
 
   useEffect(() => {
@@ -160,6 +164,15 @@ export default function TodayScreen() {
                 onPress={() => router.push('/(tabs)/profile')}
               />
             </Card>
+          </>
+        ) : null}
+
+        {/* After any schedule change the Clock app is behind until the user
+            taps through; say so where they will see it. */}
+        {ringsInClock ? (
+          <>
+            <Spacer size="lg" />
+            <ClockAlarmsCard onlyWhenOutOfSync />
           </>
         ) : null}
 

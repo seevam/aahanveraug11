@@ -254,11 +254,19 @@ cannot read it.
 - Application id is **`com.eyedropscheduler.app`** on both platforms. This is
   permanent once the app is published to either store; it cannot be renamed or
   reused afterwards.
-- `USE_EXACT_ALARM` is deliberately **not** requested. It is auto-granted and
-  cannot be revoked, which is why Google restricts it to apps whose core
-  purpose is an alarm clock or calendar. The app asks for
-  `SCHEDULE_EXACT_ALARM` instead, which the user grants, and the Profile screen
-  tells Android users how to grant it so reminders are not delayed.
+- `USE_EXACT_ALARM` **is** requested, for the sideloaded APK: Android grants it
+  at install, so exact alarm timing needs no setup. **Review before a Play
+  Store release** — Google restricts it to apps whose core purpose is an alarm
+  clock or calendar, and a medication reminder may be rejected. To drop it,
+  remove it from `android.permissions` in `app.json`; the app then falls back
+  to `SCHEDULE_EXACT_ALARM`, and Profile → Alarm setup walks the user through
+  granting it.
+- Reminders can ring through the phone's own **Clock app** (Profile → Alarm
+  setup → Ring reminders with). The app creates the alarms with Android's
+  `AlarmClock` intents (`modules/clock-alarms/`). Android does not let apps
+  read or delete Clock alarms, so the app records what it has added and lists
+  the ones the user must delete by hand after a schedule change. In this mode
+  the app's own notification is silent and exists only to record Taken/Skip.
 
 ## Not built
 

@@ -217,6 +217,11 @@ const en = {
     exactAlarmsBody: 'Android can delay reminders to save battery. Allow “Alarms & reminders” for this app in system settings so doses ring at the exact minute.',
     openSystemSettings: 'Open system settings',
     alarmSetup: 'Alarm setup',
+    ringWith: 'Ring reminders with',
+    ringWithClock: 'Clock app',
+    ringWithApp: 'This app',
+    ringWithClockBody: 'Reminders are real alarms in your phone’s Clock app, and ring exactly like a wake-up alarm.',
+    ringWithAppBody: 'This app rings its own alarm, and you can answer it with Taken, Snooze or Skip.',
     alarmSound: 'Sound and lock screen',
     alarmSoundBody: 'Some phones — Realme, Oppo, OnePlus, Vivo — switch off sound, lock-screen display and pop-up banners for new apps. Turn all of them on for “Dose alarms”.',
     battery: 'Battery',
@@ -276,6 +281,20 @@ const en = {
     skip: 'Skip this dose',
     snoozeLimitReached: 'You have snoozed this dose the maximum number of times.',
     scheduledFor: 'Scheduled for {{time}}',
+  },
+
+  clock: {
+    title: 'Clock app alarms',
+    upToDate: 'Clock app is up to date',
+    needsUpdate: 'Clock app needs updating',
+    inSyncBody: 'Your reminders are alarms in the phone’s Clock app. After you take a dose, tap Taken in the notification from this app so it shows in your reports.',
+    toAdd_one: '{{count}} alarm still needs adding to the Clock app.',
+    toAdd_other: '{{count}} alarms still need adding to the Clock app.',
+    addAction: 'Add to Clock app',
+    addFailed: 'Could not add alarms to the Clock app. Please try again.',
+    staleIntro: 'Your schedule changed. Android does not let apps delete Clock alarms, so please delete these in the Clock app:',
+    openClock: 'Open Clock app',
+    deletedAction: 'I have deleted them',
   },
 
   days: {

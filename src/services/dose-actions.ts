@@ -11,6 +11,7 @@ import {
   type Dose,
 } from '../db/repositories';
 import { cancelDose, scheduleSnooze } from '../notifications/service';
+import { getAlarmStyle } from './clock-alarms';
 
 export type DoseActionResult =
   | { ok: true; status: 'taken' | 'skipped' }
@@ -64,6 +65,7 @@ export async function snooze(doseId: string): Promise<DoseActionResult> {
     soundEnabled: reminder?.soundEnabled ?? true,
     vibrateEnabled: reminder?.vibrateEnabled ?? true,
     patientName: patient?.name ?? '',
+    ringsInClock: (await getAlarmStyle()) === 'clock',
   });
 
   await doseRepo.setStatus(doseId, 'snoozed', {
