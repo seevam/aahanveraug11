@@ -2,6 +2,7 @@ const {
   AndroidConfig,
   withAndroidManifest,
   withDangerousMod,
+  withSettingsGradle,
 } = require('expo/config-plugins');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -72,6 +73,35 @@ function withAlarmSound(config) {
   ]);
 }
 
+/**
+ * Notifee's own build.gradle applies `io.invertase.gradle.build`, which
+ * Invertase publishes to JitPack rather than Maven Central or the Gradle
+ * Plugin Portal. Expo's generated settings.gradle declares no
+ * pluginManagement repositories at all, so plugin resolution only ever
+ * searches the Portal and the build dies at configuration time.
+ */
+function withPluginRepositories(config) {
+  return withSettingsGradle(config, (cfg) => {
+    if (cfg.modResults.contents.includes('jitpack.io')) return cfg;
+
+    cfg.modResults.contents = cfg.modResults.contents.replace(
+      'pluginManagement {',
+      `pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    google()
+    mavenCentral()
+    // Hosts io.invertase.gradle.build, required by @notifee/react-native.
+    maven { url 'https://jitpack.io' }
+  }
+`,
+    );
+    return cfg;
+  });
+}
+
 module.exports = function withAlarmSupport(config) {
-  return withAlarmSound(withLockScreenActivity(withFullScreenIntentPermission(config)));
+  return withPluginRepositories(
+    withAlarmSound(withLockScreenActivity(withFullScreenIntentPermission(config))),
+  );
 };
