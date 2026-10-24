@@ -22,3 +22,6 @@ yarn-error.*
 
 .env
 .env.local
+
+# Gradle output for local native modules
+modules/*/android/build/
