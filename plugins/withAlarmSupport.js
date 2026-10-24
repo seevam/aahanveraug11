@@ -74,25 +74,30 @@ function withAlarmSound(config) {
 }
 
 /**
- * Notifee's own build.gradle applies `io.invertase.gradle.build`, which
- * Invertase publishes to JitPack rather than Maven Central or the Gradle
- * Plugin Portal. Expo's generated settings.gradle declares no
- * pluginManagement repositories at all, so plugin resolution only ever
- * searches the Portal and the build dies at configuration time.
+ * Notifee's own build.gradle applies `io.invertase.gradle.build`, a Gradle
+ * plugin published only to the Gradle Plugin Portal. Expo's generated
+ * settings.gradle declares no pluginManagement repositories, and even with the
+ * Portal reachable, resolution through a rate-limited proxy fails
+ * intermittently — Gradle reports a 429 as "plugin not found".
+ *
+ * The plugin is three small files with no transitive dependencies, so they
+ * are vendored under `vendor/maven/` and searched first. That makes this step
+ * independent of the network entirely, and reproducible for anyone who clones
+ * the repo. The Portal stays in the list as a fallback.
  */
 function withPluginRepositories(config) {
   return withSettingsGradle(config, (cfg) => {
-    if (cfg.modResults.contents.includes('jitpack.io')) return cfg;
+    if (cfg.modResults.contents.includes('vendor/maven')) return cfg;
 
     cfg.modResults.contents = cfg.modResults.contents.replace(
       'pluginManagement {',
       `pluginManagement {
   repositories {
+    // Vendored io.invertase.gradle.build for @notifee/react-native.
+    maven { url uri("\${settingsDir}/../vendor/maven") }
     gradlePluginPortal()
     google()
     mavenCentral()
-    // Hosts io.invertase.gradle.build, required by @notifee/react-native.
-    maven { url 'https://jitpack.io' }
   }
 `,
     );
