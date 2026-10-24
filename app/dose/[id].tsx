@@ -15,12 +15,12 @@ import { minutesToHHMM } from '../../src/scheduling/engine';
 import { utcToLocalMinute } from '../../src/scheduling/timezone';
 
 /**
- * The full-screen dose prompt, opened by tapping a reminder notification.
+ * The full-screen dose prompt.
  *
- * On a development build this is where Notifee's full-screen intent would
- * land the patient directly from the lock screen. With expo-notifications the
- * notification must be tapped first, which is the main capability gap of the
- * Expo Go path — the screen itself is already built for that future.
+ * On Android this is launched directly by the alarm's full-screen intent, over
+ * the lock screen, with the display turned on — the patient does not have to
+ * tap anything to reach it. On iOS, which has no full-screen alarm API, it is
+ * reached by tapping the notification.
  */
 export default function DoseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

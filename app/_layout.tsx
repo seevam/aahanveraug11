@@ -12,6 +12,7 @@ import {
   addResponseListener,
   configure,
   DEFAULT_ACTION,
+  getInitialAlarmDoseId,
 } from '../src/notifications/service';
 import { markSkipped, markTaken, snooze } from '../src/services/dose-actions';
 import { isLockEnabled } from '../src/services/security';
@@ -79,7 +80,15 @@ export default function RootLayout() {
       if (cancelled) return;
       setBooted(true);
       await SplashScreen.hideAsync().catch(() => {});
-      if (locked) router.replace('/lock');
+      if (locked) {
+        router.replace('/lock');
+        return;
+      }
+
+      // A full-screen alarm launches the app, not a route. Land on the dose
+      // that is actually ringing.
+      const ringing = await getInitialAlarmDoseId();
+      if (ringing) router.push(`/dose/${ringing}`);
     })();
 
     return () => {

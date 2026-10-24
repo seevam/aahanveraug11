@@ -21,7 +21,7 @@ import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAppStore } from '../../src/stores/app-store';
 import { patients as patientRepo } from '../../src/db/repositories';
 import { SUPPORTED_LANGUAGES, type LanguageCode } from '../../src/i18n';
-import { requestPermission } from '../../src/notifications/service';
+import { openAlarmSettings, requestPermission } from '../../src/notifications/service';
 import { backupStats, exportBackup, importBackup } from '../../src/services/backup';
 import {
   disableLock,
@@ -257,7 +257,7 @@ export default function ProfileScreen() {
             <Button
               label={t('profile.openSystemSettings')}
               variant="secondary"
-              onPress={() => void Linking.openSettings()}
+              onPress={() => void openAlarmSettings()}
             />
           </Card>
         </>

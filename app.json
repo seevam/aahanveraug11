@@ -61,18 +61,12 @@
         }
       ],
       [
-        "expo-notifications",
-        {
-          "color": "#0E7C7B",
-          "defaultChannel": "dose-alarms-v2"
-        }
-      ],
-      [
         "expo-local-authentication",
         {
           "faceIDPermission": "Eyedrop Scheduler uses Face ID to unlock your medication history."
         }
-      ]
+      ],
+      "./plugins/withAlarmSupport"
     ],
     "experiments": {
       "typedRoutes": true
