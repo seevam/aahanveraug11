@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { Alert, Linking, Platform, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, AppState, Linking, Platform, View } from 'react-native';
 import Constants from 'expo-constants';
 import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -22,10 +22,15 @@ import { useAppStore } from '../../src/stores/app-store';
 import { patients as patientRepo } from '../../src/db/repositories';
 import { SUPPORTED_LANGUAGES, type LanguageCode } from '../../src/i18n';
 import {
+  batteryOptimised,
   exactAlarmsAllowed,
+  hasManufacturerPowerSettings,
   NEEDS_FULL_SCREEN_GRANT,
   openAlarmSettings,
+  openAlarmSoundSettings,
+  openBatterySettings,
   openFullScreenAlarmSettings,
+  openManufacturerPowerSettings,
   requestPermission,
 } from '../../src/notifications/service';
 import { backupStats, exportBackup, importBackup } from '../../src/services/backup';
@@ -56,6 +61,8 @@ export default function ProfileScreen() {
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [exactAlarms, setExactAlarms] = useState<boolean | null>(null);
+  const [battery, setBattery] = useState<boolean | null>(null);
+  const [manufacturerPower, setManufacturerPower] = useState(false);
 
   // PIN entry, shown inline when the patient turns the lock on.
   const [pinStage, setPinStage] = useState<'idle' | 'set' | 'confirm'>('idle');
@@ -69,6 +76,8 @@ export default function ProfileScreen() {
     setBiometricAvailable(await isBiometricAvailable());
     setLastBackup((await backupStats()).lastBackupAt);
     setExactAlarms(await exactAlarmsAllowed().catch(() => null));
+    setBattery(await batteryOptimised().catch(() => null));
+    setManufacturerPower(await hasManufacturerPowerSettings().catch(() => false));
     await refreshPermission();
   }, [refreshPermission]);
 
@@ -77,6 +86,15 @@ export default function ProfileScreen() {
       void load();
     }, [load]),
   );
+
+  // The alarm-setup steps send the patient to system settings and back; show
+  // the new state as soon as they return, not on the next tab switch.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (next) => {
+      if (next === 'active') void load();
+    });
+    return () => subscription.remove();
+  }, [load]);
 
   async function handlePinSubmit() {
     if (pin.length !== 4) return;
@@ -248,60 +266,55 @@ export default function ProfileScreen() {
         ) : null}
       </Card>
 
-      {/* Android 14+ does not pre-grant exact alarms, and we deliberately do
-          not claim USE_EXACT_ALARM (Google restricts it to alarm-clock and
-          calendar apps). So tell the patient how to grant it rather than
-          letting their doses quietly drift by several minutes. */}
+      {/* ------------------------------------------------------ alarm setup
+          Everything Android and the phone's manufacturer can do to stop an
+          alarm from ringing, as a checklist. None of it can be switched on by
+          the app itself; each step opens the exact system screen instead. */}
       {Platform.OS === 'android' ? (
         <>
-          <Spacer size="md" />
-          <Card>
-            <Row style={{ justifyContent: 'space-between' }}>
-              <Text variant="bodyStrong" style={{ flex: 1 }}>
-                {t('profile.exactAlarms')}
-              </Text>
-              {exactAlarms !== null ? (
-                <StatusPill
-                  label={exactAlarms ? t('profile.allowed') : t('profile.notAllowed')}
-                  tone={exactAlarms ? 'success' : 'danger'}
-                />
-              ) : null}
-            </Row>
-            <Spacer size="sm" />
-            <Text variant="caption" tone="muted">
-              {t('profile.exactAlarmsBody')}
-            </Text>
-            <Spacer size="md" />
-            <Button
-              label={t('profile.openSystemSettings')}
-              variant="secondary"
-              onPress={() => void openAlarmSettings()}
-            />
-          </Card>
+          <SectionHeading>{t('profile.alarmSetup')}</SectionHeading>
 
-          {/* Android 14+ only grants full-screen alarms to apps the user
-              allows. Android offers no reliable way to read the grant back
-              from JS, so this card is always shown there rather than guessing. */}
+          {/* Without this grant, alarms still fire but may be minutes late:
+              see strongestAlarmType in service.ts. We deliberately do not
+              claim USE_EXACT_ALARM, which Google reserves for clock apps. */}
+          <SetupStep
+            title={t('profile.exactAlarms')}
+            body={t('profile.exactAlarmsBody')}
+            ok={exactAlarms}
+            onPress={() => void openAlarmSettings()}
+          />
+
+          {/* Android 14+ grants full-screen alarms only to apps the user
+              allows, and offers no reliable way to read that back from JS. */}
           {NEEDS_FULL_SCREEN_GRANT ? (
-            <>
-              <Spacer size="md" />
-              <Card>
-                <Text variant="bodyStrong">{t('profile.fullScreenAlarms')}</Text>
-                <Spacer size="sm" />
-                <Text variant="caption" tone="muted">
-                  {t('profile.fullScreenAlarmsBody')}
-                </Text>
-                <Spacer size="md" />
-                <Button
-                  label={t('profile.openSystemSettings')}
-                  variant="secondary"
-                  onPress={() => void openFullScreenAlarmSettings()}
-                />
-              </Card>
-            </>
+            <SetupStep
+              title={t('profile.fullScreenAlarms')}
+              body={t('profile.fullScreenAlarmsBody')}
+              onPress={() => void openFullScreenAlarmSettings()}
+            />
           ) : null}
 
-          <Spacer size="md" />
+          <SetupStep
+            title={t('profile.alarmSound')}
+            body={t('profile.alarmSoundBody')}
+            onPress={() => void openAlarmSoundSettings()}
+          />
+
+          <SetupStep
+            title={t('profile.battery')}
+            body={t('profile.batteryBody')}
+            ok={battery === null ? null : !battery}
+            onPress={() => void openBatterySettings()}
+          />
+
+          {manufacturerPower ? (
+            <SetupStep
+              title={t('profile.autoLaunch')}
+              body={t('profile.autoLaunchBody')}
+              onPress={() => void openManufacturerPowerSettings()}
+            />
+          ) : null}
+
           <Text variant="caption" tone="muted">
             {t('profile.alarmVolumeHint')}
           </Text>
@@ -426,5 +439,45 @@ export default function ProfileScreen() {
         </Text>
       </Card>
     </Screen>
+  );
+}
+
+/**
+ * One alarm-setup step. `ok` shows a status pill where Android lets us read
+ * the setting back; null or absent means it cannot be read, so no pill.
+ */
+function SetupStep({
+  title,
+  body,
+  ok,
+  onPress,
+}: {
+  title: string;
+  body: string;
+  ok?: boolean | null;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+  return (
+    <Card style={{ marginBottom: theme.spacing.md }}>
+      <Row style={{ justifyContent: 'space-between' }}>
+        <Text variant="bodyStrong" style={{ flex: 1 }}>
+          {title}
+        </Text>
+        {ok === true || ok === false ? (
+          <StatusPill
+            label={ok ? t('profile.allowed') : t('profile.notAllowed')}
+            tone={ok ? 'success' : 'danger'}
+          />
+        ) : null}
+      </Row>
+      <Spacer size="sm" />
+      <Text variant="caption" tone="muted">
+        {body}
+      </Text>
+      <Spacer size="md" />
+      <Button label={t('profile.openSystemSettings')} variant="secondary" onPress={onPress} />
+    </Card>
   );
 }

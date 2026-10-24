@@ -62,6 +62,9 @@ const en = {
   },
 
   today: {
+    alarmSetupTitle: 'Alarms are not fully set up',
+    alarmSetupBody: 'Your phone may delay or silence dose alarms. It takes a minute to fix.',
+    alarmSetupAction: 'Set up alarms',
     title: 'Today',
     nextDose: 'Next dose',
     noDosesTitle: 'Nothing scheduled today',
@@ -213,6 +216,13 @@ const en = {
     exactAlarms: 'Exact alarm timing',
     exactAlarmsBody: 'Android can delay reminders to save battery. Allow “Alarms & reminders” for this app in system settings so doses ring at the exact minute.',
     openSystemSettings: 'Open system settings',
+    alarmSetup: 'Alarm setup',
+    alarmSound: 'Sound and lock screen',
+    alarmSoundBody: 'Some phones — Realme, Oppo, OnePlus, Vivo — switch off sound, lock-screen display and pop-up banners for new apps. Turn all of them on for “Dose alarms”.',
+    battery: 'Battery',
+    batteryBody: 'Set this app’s battery use to “Unrestricted” or “Don’t optimise”, so the phone does not stop alarms to save power.',
+    autoLaunch: 'Auto launch and background',
+    autoLaunchBody: 'Your phone has its own app manager that can stop alarms. Allow auto launch and background activity for this app.',
     fullScreenAlarms: 'Full-screen alarms',
     fullScreenAlarmsBody: 'On Android 14 and newer, allow “Full-screen notifications” for this app. Without it, alarms arrive as a banner instead of filling the lock screen.',
     alarmVolumeHint: 'Alarms ring at your phone’s alarm volume, even on vibrate or silent. Check that the alarm volume is turned up.',

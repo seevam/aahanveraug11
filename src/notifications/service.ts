@@ -192,6 +192,46 @@ export async function exactAlarmsAllowed(): Promise<boolean | null> {
 export const NEEDS_FULL_SCREEN_GRANT =
   Platform.OS === 'android' && typeof Platform.Version === 'number' && Platform.Version >= 34;
 
+/**
+ * Opens the alarm channel's own settings page.
+ *
+ * Realme, Oppo, OnePlus and Vivo switch off sound, lock-screen display and
+ * pop-up banners for every newly installed app, leaving only a silent entry in
+ * the notification shade. Those switches live on this page, and no app can
+ * turn them back on itself.
+ */
+export async function openAlarmSoundSettings(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  await notifee.openNotificationSettings(alarmChannelId(true, true)).catch(() => {});
+}
+
+/** Whether Android's battery optimisation applies to this app. Null where it does not apply. */
+export async function batteryOptimised(): Promise<boolean | null> {
+  if (Platform.OS !== 'android') return null;
+  return notifee.isBatteryOptimizationEnabled();
+}
+
+export async function openBatterySettings(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  await notifee.openBatteryOptimizationSettings().catch(() => {});
+}
+
+/**
+ * Whether this phone's manufacturer has its own background-app manager —
+ * "Auto launch" on Realme/Oppo/Vivo, "Autostart" on Xiaomi — which can stop
+ * alarms regardless of Android's own settings. Notifee knows the screens.
+ */
+export async function hasManufacturerPowerSettings(): Promise<boolean> {
+  if (Platform.OS !== 'android') return false;
+  const info = await notifee.getPowerManagerInfo();
+  return Boolean(info.activity);
+}
+
+export async function openManufacturerPowerSettings(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  await notifee.openPowerManagerSettings().catch(() => {});
+}
+
 /** Opens this app's page under Special app access → Full-screen notifications. */
 export async function openFullScreenAlarmSettings(): Promise<void> {
   if (!NEEDS_FULL_SCREEN_GRANT) return;
@@ -238,16 +278,35 @@ const DEFAULT_ALARM_OPTIONS: DoseAlarmOptions = {
 };
 
 /**
+ * The strongest AlarmManager call Android will currently accept from us.
+ *
+ * setAlarmClock is the strongest there is: exempt from Doze and battery
+ * optimisation, and the call the system clock app uses. But it is an *exact*
+ * alarm, and when the user has not allowed exact alarms — the default after a
+ * fresh install on Android 14+ — Notifee does not fail: it prints a warning
+ * and schedules nothing at all. So without the grant we fall back to
+ * setAndAllowWhileIdle, which still fires in Doze but may be a few minutes
+ * late. A late alarm beats a missing one. Every sync re-evaluates this, so
+ * granting the permission upgrades every armed alarm on the next resume.
+ */
+async function strongestAlarmType(): Promise<AlarmType> {
+  const exact = await exactAlarmsAllowed().catch(() => null);
+  return exact === false ? AlarmType.SET_AND_ALLOW_WHILE_IDLE : AlarmType.SET_ALARM_CLOCK;
+}
+
+/**
  * Arms one dose as an alarm. Returns the notification id, or null when the
  * dose is already in the past (nothing to schedule).
  */
 export async function scheduleDose(
   dose: Dose,
   options: DoseAlarmOptions,
+  alarmType?: AlarmType,
 ): Promise<string | null> {
   if (dose.scheduledAt <= Date.now()) return null;
 
   await configure();
+  const type = alarmType ?? (await strongestAlarmType());
 
   return notifee.createTriggerNotification(
     {
@@ -288,9 +347,7 @@ export async function scheduleDose(
     {
       type: TriggerType.TIMESTAMP,
       timestamp: dose.scheduledAt,
-      // setAlarmClock is the strongest scheduling Android offers: exempt from
-      // Doze and battery optimisation, and the call the system clock app uses.
-      alarmManager: { type: AlarmType.SET_ALARM_CLOCK },
+      alarmManager: { type },
     },
   );
 }
@@ -334,6 +391,7 @@ export async function refreshScheduledNotifications(
   }
 
   await notifee.cancelTriggerNotifications();
+  const alarmType = await strongestAlarmType();
 
   // Pull a pool wider than the budget so the fair split has something to
   // choose between; comparing the two tells us whether anything was left out.
@@ -345,7 +403,7 @@ export async function refreshScheduledNotifications(
   for (const dose of window) {
     const pref = prefs.get(dose.reminderId) ?? DEFAULT_ALARM_OPTIONS;
     try {
-      const id = await scheduleDose(dose, pref);
+      const id = await scheduleDose(dose, pref, alarmType);
       await doseRepo.setNotificationId(dose.id, id);
       if (id) scheduled += 1;
     } catch {

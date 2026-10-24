@@ -14,6 +14,7 @@ import { doses as doseRepo, type Dose } from '../../src/db/repositories';
 import { markSkipped, markTaken, snooze, undoAction } from '../../src/services/dose-actions';
 import { minutesToHHMM } from '../../src/scheduling/engine';
 import { todayIn, utcToLocalMinute } from '../../src/scheduling/timezone';
+import { batteryOptimised, exactAlarmsAllowed } from '../../src/notifications/service';
 
 export default function TodayScreen() {
   const theme = useTheme();
@@ -27,6 +28,9 @@ export default function TodayScreen() {
   const [doses, setDoses] = useState<Dose[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  // Only the settings Android lets us read back. A fresh install on Android
+  // 14+ starts with exact alarms off, so this is what most new users will see.
+  const [alarmsNeedSetup, setAlarmsNeedSetup] = useState(false);
 
   const load = useCallback(async () => {
     if (!patient) {
@@ -37,6 +41,11 @@ export default function TodayScreen() {
     const today = todayIn(patient.timezone);
     setDoses(await doseRepo.forDate(patient.id, today));
     setLoading(false);
+    const [exact, battery] = await Promise.all([
+      exactAlarmsAllowed().catch(() => null),
+      batteryOptimised().catch(() => null),
+    ]);
+    setAlarmsNeedSetup(exact === false || battery === true);
   }, [patient]);
 
   useEffect(() => {
@@ -119,6 +128,34 @@ export default function TodayScreen() {
               <Spacer size="md" />
               <Button
                 label={t('onboarding.notificationsEnable')}
+                variant="secondary"
+                onPress={() => router.push('/(tabs)/profile')}
+              />
+            </Card>
+          </>
+        ) : null}
+
+        {permission === 'granted' && alarmsNeedSetup ? (
+          <>
+            <Spacer size="lg" />
+            <Card
+              style={{
+                backgroundColor: theme.colors.warningSubtle,
+                borderColor: theme.colors.warning,
+              }}
+            >
+              <Text variant="bodyStrong" style={{ color: theme.colors.onWarningSubtle }}>
+                {t('today.alarmSetupTitle')}
+              </Text>
+              <Text
+                variant="caption"
+                style={{ color: theme.colors.onWarningSubtle, marginTop: theme.spacing.xs }}
+              >
+                {t('today.alarmSetupBody')}
+              </Text>
+              <Spacer size="md" />
+              <Button
+                label={t('today.alarmSetupAction')}
                 variant="secondary"
                 onPress={() => router.push('/(tabs)/profile')}
               />

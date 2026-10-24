@@ -65,6 +65,9 @@ const hi: Translation = {
   },
 
   today: {
+    alarmSetupTitle: 'अलार्म पूरी तरह सेट नहीं हैं',
+    alarmSetupBody: 'आपका फ़ोन खुराक के अलार्म को देर से या बिना आवाज़ के बजा सकता है। ठीक करने में एक मिनट लगेगा।',
+    alarmSetupAction: 'अलार्म सेट करें',
     title: 'आज',
     nextDose: 'अगली खुराक',
     noDosesTitle: 'आज कुछ निर्धारित नहीं है',
@@ -217,6 +220,13 @@ const hi: Translation = {
     exactAlarms: 'सटीक अलार्म समय',
     exactAlarmsBody: 'बैटरी बचाने के लिए Android रिमाइंडर देर से दिखा सकता है। खुराक ठीक समय पर बजे, इसके लिए सिस्टम सेटिंग्स में इस ऐप को “Alarms & reminders” की अनुमति दें।',
     openSystemSettings: 'सिस्टम सेटिंग्स खोलें',
+    alarmSetup: 'अलार्म सेटअप',
+    alarmSound: 'आवाज़ और लॉक स्क्रीन',
+    alarmSoundBody: 'कुछ फ़ोन — Realme, Oppo, OnePlus, Vivo — नए ऐप के लिए आवाज़, लॉक स्क्रीन और पॉप-अप बैनर बंद कर देते हैं। “Dose alarms” के लिए ये सभी चालू करें।',
+    battery: 'बैटरी',
+    batteryBody: 'इस ऐप का बैटरी उपयोग “Unrestricted” या “Don’t optimise” पर रखें, ताकि फ़ोन बैटरी बचाने के लिए अलार्म न रोके।',
+    autoLaunch: 'ऑटो लॉन्च और बैकग्राउंड',
+    autoLaunchBody: 'आपके फ़ोन का अपना ऐप मैनेजर अलार्म रोक सकता है। इस ऐप के लिए ऑटो लॉन्च और बैकग्राउंड गतिविधि की अनुमति दें।',
     fullScreenAlarms: 'फ़ुल-स्क्रीन अलार्म',
     fullScreenAlarmsBody: 'Android 14 और नए फ़ोन पर इस ऐप को “Full-screen notifications” की अनुमति दें। इसके बिना अलार्म लॉक स्क्रीन पर पूरी स्क्रीन में आने के बजाय सिर्फ़ बैनर की तरह दिखेगा।',
     alarmVolumeHint: 'अलार्म फ़ोन के अलार्म वॉल्यूम पर बजते हैं, वाइब्रेट या साइलेंट मोड में भी। देख लें कि अलार्म वॉल्यूम बढ़ा हुआ है।',
