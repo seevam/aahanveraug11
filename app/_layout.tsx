@@ -74,12 +74,26 @@ export default function RootLayout() {
     let cancelled = false;
 
     (async () => {
-      await configure();
-      const locked = await isLockEnabled();
-      await bootstrap();
+      // Nothing here may leave the app stuck on its splash screen. A broken
+      // alarm channel is serious, but the patient can still see and record
+      // doses without it, so it is reported and startup carries on.
+      try {
+        await configure();
+      } catch (error) {
+        console.error('Alarm channel setup failed', error);
+      }
+
+      let locked = false;
+      try {
+        locked = await isLockEnabled();
+        await bootstrap();
+      } finally {
+        if (!cancelled) {
+          setBooted(true);
+          await SplashScreen.hideAsync().catch(() => {});
+        }
+      }
       if (cancelled) return;
-      setBooted(true);
-      await SplashScreen.hideAsync().catch(() => {});
       if (locked) {
         router.replace('/lock');
         return;

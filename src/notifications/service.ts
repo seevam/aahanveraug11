@@ -46,6 +46,7 @@ import { Platform } from 'react-native';
 
 import { doses as doseRepo, type Dose } from '../db/repositories';
 import { allocateFairly } from './allocation';
+import { ALARM_VIBRATION_PATTERN } from './alarm-pattern';
 
 /**
  * How many alarms we keep armed at once.
@@ -73,9 +74,6 @@ export const DOSE_CATEGORY_ID = 'dose-reminder';
 const ALARM_SOUND_ANDROID = 'alarm_tone';
 const ALARM_SOUND_IOS = 'alarm_tone.wav';
 
-/** Long pulses, repeated — a pattern meant to wake someone, not to notify them. */
-const ALARM_VIBRATION_PATTERN = [0, 800, 400, 800, 400, 800];
-
 /** How long after a scheduled time a dose stays actionable before it is missed. */
 export const MISSED_GRACE_MINUTES = 30;
 
@@ -94,7 +92,6 @@ let configured = false;
 /** Creates the alarm channel and retires superseded ones. */
 export async function configure(): Promise<void> {
   if (configured) return;
-  configured = true;
 
   if (Platform.OS === 'android') {
     await notifee.createChannel({
@@ -116,6 +113,9 @@ export async function configure(): Promise<void> {
       await notifee.deleteChannel(legacy).catch(() => {});
     }
   }
+
+  // Only once it has actually worked, so a failure is retried next launch.
+  configured = true;
 }
 
 export type PermissionState = 'granted' | 'denied' | 'undetermined';
@@ -226,7 +226,9 @@ export async function scheduleDose(
       },
       ios: {
         categoryId: DOSE_CATEGORY_ID,
-        sound: options.soundEnabled ? ALARM_SOUND_IOS : undefined,
+        // Omitted rather than `undefined`: Notifee's iOS validator rejects a
+        // `sound` key that is present without a string value.
+        ...(options.soundEnabled ? { sound: ALARM_SOUND_IOS } : {}),
         interruptionLevel: IOS_CRITICAL_ALERTS_ENTITLED ? 'critical' : 'timeSensitive',
       },
     },
