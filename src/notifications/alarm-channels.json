@@ -1,0 +1,6 @@
+[
+  { "id": "dose-alarm-v4-sound-vibrate", "name": "Dose alarms", "sound": true, "vibrate": true },
+  { "id": "dose-alarm-v4-sound", "name": "Dose alarms (no vibration)", "sound": true, "vibrate": false },
+  { "id": "dose-alarm-v4-vibrate", "name": "Dose alarms (vibrate only)", "sound": false, "vibrate": true },
+  { "id": "dose-alarm-v4-quiet", "name": "Dose alarms (silent)", "sound": false, "vibrate": false }
+]

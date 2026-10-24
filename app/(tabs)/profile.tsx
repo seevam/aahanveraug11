@@ -21,7 +21,13 @@ import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAppStore } from '../../src/stores/app-store';
 import { patients as patientRepo } from '../../src/db/repositories';
 import { SUPPORTED_LANGUAGES, type LanguageCode } from '../../src/i18n';
-import { openAlarmSettings, requestPermission } from '../../src/notifications/service';
+import {
+  exactAlarmsAllowed,
+  NEEDS_FULL_SCREEN_GRANT,
+  openAlarmSettings,
+  openFullScreenAlarmSettings,
+  requestPermission,
+} from '../../src/notifications/service';
 import { backupStats, exportBackup, importBackup } from '../../src/services/backup';
 import {
   disableLock,
@@ -49,6 +55,7 @@ export default function ProfileScreen() {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [exactAlarms, setExactAlarms] = useState<boolean | null>(null);
 
   // PIN entry, shown inline when the patient turns the lock on.
   const [pinStage, setPinStage] = useState<'idle' | 'set' | 'confirm'>('idle');
@@ -61,6 +68,7 @@ export default function ProfileScreen() {
     setBiometricOn(await isBiometricEnabled());
     setBiometricAvailable(await isBiometricAvailable());
     setLastBackup((await backupStats()).lastBackupAt);
+    setExactAlarms(await exactAlarmsAllowed().catch(() => null));
     await refreshPermission();
   }, [refreshPermission]);
 
@@ -248,7 +256,17 @@ export default function ProfileScreen() {
         <>
           <Spacer size="md" />
           <Card>
-            <Text variant="bodyStrong">{t('profile.exactAlarms')}</Text>
+            <Row style={{ justifyContent: 'space-between' }}>
+              <Text variant="bodyStrong" style={{ flex: 1 }}>
+                {t('profile.exactAlarms')}
+              </Text>
+              {exactAlarms !== null ? (
+                <StatusPill
+                  label={exactAlarms ? t('profile.allowed') : t('profile.notAllowed')}
+                  tone={exactAlarms ? 'success' : 'danger'}
+                />
+              ) : null}
+            </Row>
             <Spacer size="sm" />
             <Text variant="caption" tone="muted">
               {t('profile.exactAlarmsBody')}
@@ -260,6 +278,33 @@ export default function ProfileScreen() {
               onPress={() => void openAlarmSettings()}
             />
           </Card>
+
+          {/* Android 14+ only grants full-screen alarms to apps the user
+              allows. Android offers no reliable way to read the grant back
+              from JS, so this card is always shown there rather than guessing. */}
+          {NEEDS_FULL_SCREEN_GRANT ? (
+            <>
+              <Spacer size="md" />
+              <Card>
+                <Text variant="bodyStrong">{t('profile.fullScreenAlarms')}</Text>
+                <Spacer size="sm" />
+                <Text variant="caption" tone="muted">
+                  {t('profile.fullScreenAlarmsBody')}
+                </Text>
+                <Spacer size="md" />
+                <Button
+                  label={t('profile.openSystemSettings')}
+                  variant="secondary"
+                  onPress={() => void openFullScreenAlarmSettings()}
+                />
+              </Card>
+            </>
+          ) : null}
+
+          <Spacer size="md" />
+          <Text variant="caption" tone="muted">
+            {t('profile.alarmVolumeHint')}
+          </Text>
         </>
       ) : null}
 

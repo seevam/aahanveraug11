@@ -36,17 +36,23 @@ import notifee, {
   AlarmType,
   AndroidCategory,
   AndroidImportance,
+  AndroidNotificationSetting,
   AndroidVisibility,
   AuthorizationStatus,
   EventType,
   TriggerType,
   type Event,
 } from '@notifee/react-native';
+import Constants from 'expo-constants';
+import { startActivityAsync } from 'expo-intent-launcher';
 import { Platform } from 'react-native';
 
 import { doses as doseRepo, type Dose } from '../db/repositories';
 import { allocateFairly } from './allocation';
 import { ALARM_VIBRATION_PATTERN } from './alarm-pattern';
+import alarmChannels from './alarm-channels.json';
+
+type AlarmChannel = { id: string; name: string; sound: boolean; vibrate: boolean };
 
 /**
  * How many alarms we keep armed at once.
@@ -62,11 +68,22 @@ export const NOTIFICATION_BUDGET = 56;
  * sound and audio routing are frozen, and later edits are silently ignored so
  * the user stays in control of their own settings. Changing any of those means
  * publishing a NEW channel id and deleting the old one — hence the version
- * suffix. Bump it whenever the channel configuration below changes, or
- * existing installs keep the old behaviour forever.
+ * suffix.
+ *
+ * The channels themselves are created natively by `plugins/withAlarmSupport.js`,
+ * because only native code can put a channel on the ALARM stream — the one
+ * that still rings when the phone is on vibrate or silent. There is one per
+ * sound/vibration combination, since on Android 8+ the channel, not the
+ * notification, decides both. The list is shared with the plugin.
  */
-export const ANDROID_CHANNEL_ID = 'dose-alarms-v3';
-const LEGACY_ANDROID_CHANNEL_IDS = ['dose-reminders', 'dose-alarms-v2'];
+const ANDROID_CHANNELS: readonly AlarmChannel[] = alarmChannels;
+
+const LEGACY_ANDROID_CHANNEL_IDS = ['dose-reminders', 'dose-alarms-v2', 'dose-alarms-v3'];
+
+export function alarmChannelId(sound: boolean, vibrate: boolean): string {
+  const match = ANDROID_CHANNELS.find((c) => c.sound === sound && c.vibrate === vibrate);
+  return (match ?? ANDROID_CHANNELS[0]!).id;
+}
 
 export const DOSE_CATEGORY_ID = 'dose-reminder';
 
@@ -89,25 +106,32 @@ const IOS_CRITICAL_ALERTS_ENTITLED = false;
 
 let configured = false;
 
-/** Creates the alarm channel and retires superseded ones. */
+/**
+ * Checks the alarm channels exist and retires superseded ones.
+ *
+ * The native side should already have created them. If it has not, Notifee
+ * creates them as a fallback — on the notification stream, so they will not
+ * ring on vibrate, but a quieter alarm beats none.
+ */
 export async function configure(): Promise<void> {
   if (configured) return;
 
   if (Platform.OS === 'android') {
-    await notifee.createChannel({
-      id: ANDROID_CHANNEL_ID,
-      name: 'Dose alarms',
-      description: 'Rings when an eye drop is due.',
-      importance: AndroidImportance.HIGH,
-      visibility: AndroidVisibility.PUBLIC,
-      sound: ALARM_SOUND_ANDROID,
-      vibration: true,
-      vibrationPattern: ALARM_VIBRATION_PATTERN,
-      // Ring through Do Not Disturb. Android only honours this once the user
-      // grants notification-policy access; until then it is ignored rather
-      // than rejected, so asking costs nothing.
-      bypassDnd: true,
-    });
+    for (const channel of ANDROID_CHANNELS) {
+      if (await notifee.isChannelCreated(channel.id)) continue;
+      console.warn(`Alarm channel ${channel.id} missing natively; creating a fallback.`);
+      await notifee.createChannel({
+        id: channel.id,
+        name: channel.name,
+        description: 'Rings when an eye drop is due.',
+        importance: AndroidImportance.HIGH,
+        visibility: AndroidVisibility.PUBLIC,
+        ...(channel.sound ? { sound: ALARM_SOUND_ANDROID } : {}),
+        vibration: channel.vibrate,
+        ...(channel.vibrate ? { vibrationPattern: ALARM_VIBRATION_PATTERN } : {}),
+        bypassDnd: true,
+      });
+    }
 
     for (const legacy of LEGACY_ANDROID_CHANNEL_IDS) {
       await notifee.deleteChannel(legacy).catch(() => {});
@@ -150,6 +174,35 @@ export async function requestPermission(): Promise<PermissionState> {
 export async function openAlarmSettings(): Promise<void> {
   if (Platform.OS !== 'android') return;
   await notifee.openAlarmPermissionSettings().catch(() => {});
+}
+
+/** Whether Android will fire alarms at the exact minute. Null where it does not apply. */
+export async function exactAlarmsAllowed(): Promise<boolean | null> {
+  if (Platform.OS !== 'android') return null;
+  const { android } = await notifee.getNotificationSettings();
+  if (android.alarm === AndroidNotificationSetting.NOT_SUPPORTED) return null;
+  return android.alarm === AndroidNotificationSetting.ENABLED;
+}
+
+/**
+ * Android 14 (API 34) stopped granting full-screen intents at install to
+ * anything but calling and alarm-clock apps. Without the grant, the alarm
+ * still rings but arrives as a banner instead of taking over the lock screen.
+ */
+export const NEEDS_FULL_SCREEN_GRANT =
+  Platform.OS === 'android' && typeof Platform.Version === 'number' && Platform.Version >= 34;
+
+/** Opens this app's page under Special app access → Full-screen notifications. */
+export async function openFullScreenAlarmSettings(): Promise<void> {
+  if (!NEEDS_FULL_SCREEN_GRANT) return;
+  try {
+    await startActivityAsync('android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT', {
+      data: `package:${Constants.expoConfig?.android?.package ?? 'com.eyedropscheduler.app'}`,
+    });
+  } catch {
+    // Some manufacturers remove the screen; the app info page is the next best.
+    await notifee.openNotificationSettings().catch(() => {});
+  }
 }
 
 function body(dose: Dose): string {
@@ -205,7 +258,7 @@ export async function scheduleDose(
       body: body(dose),
       data: { doseId: dose.id, patientId: dose.patientId },
       android: {
-        channelId: ANDROID_CHANNEL_ID,
+        channelId: alarmChannelId(options.soundEnabled, options.vibrateEnabled),
         category: AndroidCategory.ALARM,
         importance: AndroidImportance.HIGH,
         visibility: AndroidVisibility.PUBLIC,
@@ -366,4 +419,23 @@ export async function getInitialAlarmDoseId(): Promise<string | null> {
   const initial = await notifee.getInitialNotification();
   const doseId = initial?.notification?.data?.doseId;
   return typeof doseId === 'string' ? doseId : null;
+}
+
+/**
+ * The dose whose alarm is on screen right now, if any — the oldest, when
+ * several are.
+ *
+ * Covers what `getInitialAlarmDoseId` cannot: a full-screen alarm that brings
+ * an already-running app to the front reports no launch notification and
+ * fires no event, so the only reliable signal is what is still displayed.
+ * Taken, Snooze and Skip all remove the notification, so anything here is
+ * still unanswered.
+ */
+export async function getRingingDoseId(): Promise<string | null> {
+  const displayed = await notifee.getDisplayedNotifications();
+  const ringing = displayed
+    .map((d) => ({ doseId: d.notification.data?.doseId, at: d.date ?? '' }))
+    .filter((d): d is { doseId: string; at: string } => typeof d.doseId === 'string')
+    .sort((a, b) => a.at.localeCompare(b.at));
+  return ringing[0]?.doseId ?? null;
 }

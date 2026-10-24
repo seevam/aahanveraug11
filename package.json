@@ -23,6 +23,7 @@
     "expo-document-picker": "~57.0.3",
     "expo-file-system": "~57.0.6",
     "expo-haptics": "~57.0.3",
+    "expo-intent-launcher": "~57.0.1",
     "expo-linking": "~57.0.13",
     "expo-local-authentication": "~57.0.3",
     "expo-localization": "~57.0.2",
