@@ -22,6 +22,7 @@ export function Button({
   icon,
   style,
   accessibilityHint,
+  accessibilityLabel,
 }: {
   label: string;
   onPress?: () => void;
@@ -32,6 +33,8 @@ export function Button({
   icon?: string;
   style?: StyleProp<ViewStyle>;
   accessibilityHint?: string;
+  /** For buttons whose visible label is a symbol, such as − and +. */
+  accessibilityLabel?: string;
 }) {
   const theme = useTheme();
   const isDisabled = disabled || loading;
@@ -60,7 +63,7 @@ export function Button({
       onPress={onPress}
       disabled={isDisabled}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       style={({ pressed }) => [

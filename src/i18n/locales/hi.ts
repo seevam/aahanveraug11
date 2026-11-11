@@ -78,17 +78,17 @@ const hi: Translation = {
     remaining_other: 'आज {{count}} खुराकें बाकी',
     upcoming: 'आने वाली',
     earlier: 'आज पहले',
-    markTaken: 'ले ली',
-    snooze: 'बाद में',
+    markTaken: 'ले लिया',
+    snooze: 'स्नूज़',
     skipDose: 'छोड़ें',
     undo: 'पूर्ववत करें',
-    movedFor: 'बूँदों के बीच {{minutes}} मिनट का अंतर रखने के लिए {{time}} पर किया गया',
+    movedFor: 'बूँदों के बीच {{minutes}} मिनट का अंतर रखने के लिए इसे {{time}} पर कर दिया गया',
   },
 
   status: {
     pending: 'बाकी',
-    taken: 'ले ली',
-    snoozed: 'टाली गई',
+    taken: 'ले लिया',
+    snoozed: 'स्नूज़ की गई',
     skipped: 'छोड़ी गई',
     missed: 'छूट गई',
   },
@@ -146,9 +146,9 @@ const hi: Translation = {
     startDate: 'शुरू',
     endDate: 'समाप्त',
     endDateNever: 'कोई अंतिम तिथि नहीं',
-    snoozeSettings: 'टालना',
-    snoozeLength: 'कितनी देर टालें',
-    snoozeLimit: 'अधिकतम कितनी बार टालें',
+    snoozeSettings: 'स्नूज़',
+    snoozeLength: 'कितनी देर के लिए स्नूज़ करें',
+    snoozeLimit: 'अधिकतम कितनी बार स्नूज़ करें',
     alerts: 'सूचनाएँ',
     sound: 'आवाज़',
     vibration: 'कंपन',
@@ -225,7 +225,7 @@ const hi: Translation = {
     ringWithClock: 'क्लॉक ऐप',
     ringWithApp: 'यह ऐप',
     ringWithClockBody: 'रिमाइंडर आपके फ़ोन के क्लॉक ऐप में असली अलार्म बनते हैं और बिल्कुल सुबह के अलार्म की तरह बजते हैं।',
-    ringWithAppBody: 'यह ऐप अपना अलार्म बजाता है, और आप उसका जवाब “ले ली”, “स्नूज़” या “छोड़ें” से दे सकते हैं।',
+    ringWithAppBody: 'यह ऐप अपना अलार्म बजाता है, और आप उसका जवाब “ले लिया”, “स्नूज़” या “छोड़ें” से दे सकते हैं।',
     alarmSound: 'आवाज़ और लॉक स्क्रीन',
     alarmSoundBody: 'कुछ फ़ोन — Realme, Oppo, OnePlus, Vivo — नए ऐप के लिए आवाज़, लॉक स्क्रीन और पॉप-अप बैनर बंद कर देते हैं। “Dose alarms” के लिए ये सभी चालू करें।',
     battery: 'बैटरी',
@@ -234,7 +234,6 @@ const hi: Translation = {
     autoLaunchBody: 'आपके फ़ोन का अपना ऐप मैनेजर अलार्म रोक सकता है। इस ऐप के लिए ऑटो लॉन्च और बैकग्राउंड गतिविधि की अनुमति दें।',
     fullScreenAlarms: 'फ़ुल-स्क्रीन अलार्म',
     fullScreenAlarmsBody: 'Android 14 और नए फ़ोन पर इस ऐप को “Full-screen notifications” की अनुमति दें। इसके बिना अलार्म लॉक स्क्रीन पर पूरी स्क्रीन में आने के बजाय सिर्फ़ बैनर की तरह दिखेगा।',
-    alarmVolumeHint: 'अलार्म फ़ोन के अलार्म वॉल्यूम पर बजते हैं, वाइब्रेट या साइलेंट मोड में भी। देख लें कि अलार्म वॉल्यूम बढ़ा हुआ है।',
     allowed: 'अनुमति है',
     notAllowed: 'अनुमति नहीं',
     notificationsStatus: 'रिमाइंडर',
@@ -280,10 +279,10 @@ const hi: Translation = {
   alarm: {
     forPerson: '{{name}} के लिए',
     timeFor: 'समय हो गया',
-    taken: 'ले ली',
-    snooze: '{{minutes}} मिनट बाद',
+    taken: 'ले लिया',
+    snooze: '{{minutes}} मिनट के लिए स्नूज़',
     skip: 'यह खुराक छोड़ें',
-    snoozeLimitReached: 'आप इस खुराक को अधिकतम बार टाल चुके हैं।',
+    snoozeLimitReached: 'आप इस खुराक को अधिकतम बार स्नूज़ कर चुके हैं।',
     scheduledFor: '{{time}} के लिए निर्धारित',
   },
 
@@ -291,7 +290,7 @@ const hi: Translation = {
     title: 'क्लॉक ऐप अलार्म',
     upToDate: 'क्लॉक ऐप अप-टू-डेट है',
     needsUpdate: 'क्लॉक ऐप को अपडेट करना है',
-    inSyncBody: 'आपके रिमाइंडर फ़ोन के क्लॉक ऐप में अलार्म हैं। खुराक लेने के बाद इस ऐप की सूचना में “ले ली” दबाएँ, ताकि वह आपकी रिपोर्ट में दिखे।',
+    inSyncBody: 'आपके रिमाइंडर फ़ोन के क्लॉक ऐप में अलार्म हैं। खुराक लेने के बाद इस ऐप की सूचना में “ले लिया” दबाएँ, ताकि वह आपकी रिपोर्ट में दिखे।',
     toAdd_one: '{{count}} अलार्म अभी क्लॉक ऐप में जोड़ना बाकी है।',
     toAdd_other: '{{count}} अलार्म अभी क्लॉक ऐप में जोड़ने बाकी हैं।',
     addAction: 'क्लॉक ऐप में जोड़ें',
@@ -299,6 +298,26 @@ const hi: Translation = {
     staleIntro: 'आपका शेड्यूल बदल गया है। Android ऐप को क्लॉक अलार्म मिटाने नहीं देता, इसलिए कृपया क्लॉक ऐप में ये अलार्म मिटाएँ:',
     openClock: 'क्लॉक ऐप खोलें',
     deletedAction: 'मैंने इन्हें मिटा दिया',
+  },
+
+  volume: {
+    title: 'अलार्म की आवाज़',
+    body: 'अलार्म इसी आवाज़ पर बजते हैं, वाइब्रेट या साइलेंट मोड में भी। फ़ोन की रिंग और मीडिया की आवाज़ से यह नहीं बदलती।',
+    silentWarning: 'अलार्म की आवाज़ बंद है। आपको खुराक के अलार्म सुनाई नहीं देंगे।',
+    quieter: 'आवाज़ कम करें',
+    louder: 'आवाज़ बढ़ाएँ',
+    level: 'आवाज़ {{max}} में से {{current}}',
+    test: 'टेस्ट आवाज़ सुनें',
+    stopTest: 'टेस्ट आवाज़ रोकें',
+  },
+
+  // Short on purpose, and with no-break spaces: Android squeezes three action
+  // buttons into one row, and a label with an ordinary space can wrap, leaving
+  // only its first word visible ("ले" instead of "ले लिया").
+  notify: {
+    taken: 'ले लिया',
+    snooze: 'स्नूज़',
+    skip: 'छोड़ें',
   },
 
   days: {

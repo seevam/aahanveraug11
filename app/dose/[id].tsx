@@ -13,6 +13,7 @@ import { doses as doseRepo, reminders as reminderRepo, type Dose } from '../../s
 import { markSkipped, markTaken, snooze } from '../../src/services/dose-actions';
 import { minutesToHHMM } from '../../src/scheduling/engine';
 import { utcToLocalMinute } from '../../src/scheduling/timezone';
+import { isSnoozable } from '../../src/scheduling/snooze';
 
 /**
  * The full-screen dose prompt.
@@ -141,7 +142,7 @@ export default function DoseScreen() {
             onPress={() => act(() => markTaken(dose.id), Haptics.NotificationFeedbackType.Success)}
           />
 
-          {snoozeExhausted ? (
+          {!isSnoozable(dose, Date.now()) ? null : snoozeExhausted ? (
             <Text
               variant="caption"
               style={{ color: theme.colors.onPrimary, textAlign: 'center', opacity: 0.9 }}

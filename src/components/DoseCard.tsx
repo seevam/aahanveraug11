@@ -7,6 +7,7 @@ import { Card, Row, Text } from './primitives';
 import { Button, StatusPill } from './Button';
 import { minutesToHHMM } from '../scheduling/engine';
 import { utcToLocalMinute } from '../scheduling/timezone';
+import { isSnoozable } from '../scheduling/snooze';
 import { DEFAULT_GAP_MINUTES } from '../scheduling/types';
 import type { Dose } from '../db/repositories';
 import type { DoseStatus } from '../scheduling/adherence';
@@ -48,6 +49,9 @@ export function DoseCard({
 
   const time = minutesToHHMM(utcToLocalMinute(dose.scheduledAt, timezone));
   const actionable = dose.status === 'pending' || dose.status === 'snoozed';
+  // Snooze only appears once the alarm has rung; before that the dose can
+  // still be taken early or skipped, but not postponed.
+  const snoozable = isSnoozable(dose, Date.now());
   const eyeLabel = t(`eye.${dose.eye}`);
   const statusLabel = t(`status.${dose.status}`);
 
@@ -102,12 +106,14 @@ export function DoseCard({
             accessibilityHint={`${dose.medicationName}, ${time}`}
           />
           <Row style={{ gap: theme.spacing.sm }}>
-            <Button
-              label={t('today.snooze')}
-              variant="secondary"
-              onPress={onSnooze}
-              style={{ flex: 1 }}
-            />
+            {snoozable ? (
+              <Button
+                label={t('today.snooze')}
+                variant="secondary"
+                onPress={onSnooze}
+                style={{ flex: 1 }}
+              />
+            ) : null}
             <Button
               label={t('today.skipDose')}
               variant="secondary"

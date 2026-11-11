@@ -230,7 +230,6 @@ const en = {
     autoLaunchBody: 'Your phone has its own app manager that can stop alarms. Allow auto launch and background activity for this app.',
     fullScreenAlarms: 'Full-screen alarms',
     fullScreenAlarmsBody: 'On Android 14 and newer, allow “Full-screen notifications” for this app. Without it, alarms arrive as a banner instead of filling the lock screen.',
-    alarmVolumeHint: 'Alarms ring at your phone’s alarm volume, even on vibrate or silent. Check that the alarm volume is turned up.',
     allowed: 'Allowed',
     notAllowed: 'Not allowed',
     notificationsStatus: 'Reminders',
@@ -295,6 +294,25 @@ const en = {
     staleIntro: 'Your schedule changed. Android does not let apps delete Clock alarms, so please delete these in the Clock app:',
     openClock: 'Open Clock app',
     deletedAction: 'I have deleted them',
+  },
+
+  volume: {
+    title: 'Alarm volume',
+    body: 'Alarms ring at this volume, even when the phone is on vibrate or silent. The ring and media volume do not change it.',
+    silentWarning: 'Alarm volume is off. You will not hear dose alarms.',
+    quieter: 'Quieter',
+    louder: 'Louder',
+    level: 'Volume {{current}} of {{max}}',
+    test: 'Play test sound',
+    stopTest: 'Stop test sound',
+  },
+
+  // Short on purpose: Android squeezes three action buttons into one row, and
+  // a long label is cut off or wrapped onto a line the notification hides.
+  notify: {
+    taken: 'Taken',
+    snooze: 'Snooze',
+    skip: 'Skip',
   },
 
   days: {

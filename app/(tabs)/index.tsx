@@ -16,6 +16,7 @@ import { minutesToHHMM } from '../../src/scheduling/engine';
 import { todayIn, utcToLocalMinute } from '../../src/scheduling/timezone';
 import { batteryOptimised, exactAlarmsAllowed } from '../../src/notifications/service';
 import { getAlarmStyle } from '../../src/services/clock-alarms';
+import { getAlarmVolume } from '../../modules/alarm-audio';
 import { ClockAlarmsCard } from '../../src/components/ClockAlarmsCard';
 
 export default function TodayScreen() {
@@ -30,6 +31,13 @@ export default function TodayScreen() {
   const [doses, setDoses] = useState<Dose[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  // Snooze appears the moment a dose comes due; re-render so it does, rather
+  // than waiting for the next data change.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setTick((n) => n + 1), 15_000);
+    return () => clearInterval(timer);
+  }, []);
   // Only the settings Android lets us read back. A fresh install on Android
   // 14+ starts with exact alarms off, so this is what most new users will see.
   const [alarmsNeedSetup, setAlarmsNeedSetup] = useState(false);
@@ -48,7 +56,9 @@ export default function TodayScreen() {
       exactAlarmsAllowed().catch(() => null),
       batteryOptimised().catch(() => null),
     ]);
-    setAlarmsNeedSetup(exact === false || battery === true);
+    // A muted alarm volume is the quietest way for an alarm to fail.
+    const volume = getAlarmVolume();
+    setAlarmsNeedSetup(exact === false || battery === true || (volume !== null && volume.current <= 0));
     setRingsInClock((await getAlarmStyle()) === 'clock');
   }, [patient]);
 

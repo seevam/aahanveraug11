@@ -368,6 +368,43 @@ export const doses = {
     return row ? toDose(row) : null;
   },
 
+  /**
+   * When this patient's other drops are, within a window — for keeping a
+   * snooze clear of them.
+   *
+   * Unanswered doses count at their scheduled time. Taken doses count at the
+   * moment they were actually taken, because that is when the washout started.
+   * Skipped and missed doses were never put in the eye, so they take no space.
+   */
+  async occupiedTimes(
+    patientId: string,
+    excludeDoseId: string,
+    from: number,
+    to: number,
+  ): Promise<number[]> {
+    const db = await getDatabase();
+    const rows = await db.getAllAsync<{ at: number }>(
+      `SELECT scheduled_at AS at FROM doses
+        WHERE patient_id = ? AND id != ?
+          AND status IN ('pending', 'snoozed')
+          AND scheduled_at BETWEEN ? AND ?
+       UNION ALL
+       SELECT COALESCE(acted_at, scheduled_at) AS at FROM doses
+        WHERE patient_id = ? AND id != ?
+          AND status = 'taken'
+          AND COALESCE(acted_at, scheduled_at) BETWEEN ? AND ?`,
+      patientId,
+      excludeDoseId,
+      from,
+      to,
+      patientId,
+      excludeDoseId,
+      from,
+      to,
+    );
+    return rows.map((r) => r.at);
+  },
+
   /** Pending or snoozed doses across all patients, soonest first. */
   async upcoming(limit: number, from: number = Date.now()): Promise<Dose[]> {
     const db = await getDatabase();

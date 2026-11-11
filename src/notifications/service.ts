@@ -353,9 +353,9 @@ export async function scheduleDose(
         vibrationPattern: vibrate ? ALARM_VIBRATION_PATTERN : undefined,
         pressAction: { id: 'default', launchActivity: 'default' },
         actions: [
-          { title: label('alarm.taken', 'Taken'), pressAction: { id: 'taken' } },
-          { title: label('today.snooze', 'Snooze'), pressAction: { id: 'snooze' } },
-          { title: label('common.skip', 'Skip'), pressAction: { id: 'skip' } },
+          { title: label('notify.taken', 'Taken'), pressAction: { id: 'taken' } },
+          { title: label('notify.snooze', 'Snooze'), pressAction: { id: 'snooze' } },
+          { title: label('notify.skip', 'Skip'), pressAction: { id: 'skip' } },
         ],
       },
       ios: {
@@ -437,13 +437,17 @@ export async function refreshScheduledNotifications(
   return { scheduled, truncated };
 }
 
-/** Arms a one-off alarm for a snoozed dose. */
+/**
+ * Arms a one-off alarm for a snoozed dose at `scheduledAt`.
+ *
+ * The time is chosen by the caller, not computed here, because it has to clear
+ * the patient's other drops — see `findSnoozeSlot`.
+ */
 export async function scheduleSnooze(
   dose: Dose,
-  minutes: number,
+  scheduledAt: number,
   options: DoseAlarmOptions,
 ): Promise<{ scheduledAt: number; notificationId: string | null }> {
-  const scheduledAt = Date.now() + minutes * 60_000;
   const id = await scheduleDose({ ...dose, scheduledAt }, options);
   return { scheduledAt, notificationId: id };
 }

@@ -17,6 +17,7 @@ import { Button, PressableRow, StatusPill } from '../../src/components/Button';
 import { Field, Segmented, TextField, ToggleRow } from '../../src/components/inputs';
 import { ImpactCard } from '../../src/components/ImpactCard';
 import { ClockAlarmsCard } from '../../src/components/ClockAlarmsCard';
+import { AlarmVolumeCard } from '../../src/components/AlarmVolumeCard';
 import { Avatar } from '../../src/components/PatientSwitcher';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAppStore } from '../../src/stores/app-store';
@@ -292,6 +293,11 @@ export default function ProfileScreen() {
         <>
           <SectionHeading>{t('profile.alarmSetup')}</SectionHeading>
 
+          {/* Both this app's alarms and the Clock app's ring on the alarm
+              stream, so this one control covers either style. */}
+          <AlarmVolumeCard />
+          <Spacer size="md" />
+
           {/* Clock mode hands the ringing to the phone's own Clock app; see
               src/services/clock-alarms.ts. Offered only where a Clock app
               accepts alarms from other apps. */}
@@ -365,11 +371,6 @@ export default function ProfileScreen() {
             />
           ) : null}
 
-          {alarmStyle === 'app' ? (
-            <Text variant="caption" tone="muted">
-              {t('profile.alarmVolumeHint')}
-            </Text>
-          ) : null}
         </>
       ) : null}
 

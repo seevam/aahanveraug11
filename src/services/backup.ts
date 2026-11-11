@@ -14,8 +14,10 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { Share } from 'react-native';
 
 import { getDatabase } from '../db/client';
+import { reportSubject } from '../scheduling/report-subject';
 import { patients as patientRepo, settings as settingsRepo } from '../db/repositories';
 import type { DoseRow, PatientRow, PrescriptionRow, ReminderRow } from '../db/schema';
 
@@ -237,19 +239,23 @@ export async function importBackup(): Promise<ImportResult> {
   };
 }
 
-/** Human-readable adherence summary for sharing with a doctor. */
+/**
+ * Shares the adherence summary as text, with a subject line for email.
+ *
+ * Sent as the message body rather than as an attached file: an email with the
+ * report in it can be read at a glance, and the same text pastes into a chat.
+ * React Native turns `title` into the email subject on Android and
+ * `options.subject` on iOS, so both are set.
+ */
 export async function shareAdherenceText(patientId: string, text: string): Promise<boolean> {
   try {
     const patient = await patientRepo.get(patientId);
-    const name = patient?.name.replace(/[^a-zA-Z0-9]/g, '-') ?? 'patient';
-    const file = new FileSystem.File(FileSystem.Paths.cache, `eyedrop-scheduler-report-${name}.txt`);
-    if (file.exists) file.delete();
-    file.create();
-    file.write(text);
-
-    if (!(await Sharing.isAvailableAsync())) return false;
-    await Sharing.shareAsync(file.uri, { mimeType: 'text/plain', dialogTitle: 'Adherence report' });
-    return true;
+    const subject = reportSubject(patient?.name);
+    const result = await Share.share(
+      { title: subject, message: text },
+      { subject, dialogTitle: subject },
+    );
+    return result.action !== Share.dismissedAction;
   } catch {
     return false;
   }
