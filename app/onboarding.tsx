@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { Image, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -73,7 +73,13 @@ export default function Onboarding() {
     <Screen contentStyle={{ flexGrow: 1, justifyContent: 'center' }}>
       {step === 'welcome' ? (
         <View>
-          <EmojiIcon symbol="👁️" size={64} />
+          <Image
+            source={require('../assets/logo.png')}
+            style={{ width: 140, height: 210, alignSelf: 'center' }}
+            resizeMode="contain"
+            accessibilityRole="image"
+            accessibilityLabel={t('common.appName')}
+          />
           <Spacer size="xl" />
           <Text variant="display" accessibilityRole="header" style={{ textAlign: 'center' }}>
             {t('onboarding.welcomeTitle')}

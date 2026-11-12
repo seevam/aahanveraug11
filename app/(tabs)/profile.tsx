@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, AppState, Linking, Platform, View } from 'react-native';
+import { Alert, AppState, Image, Linking, Platform, View } from 'react-native';
 import Constants from 'expo-constants';
 import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -478,10 +478,21 @@ export default function ProfileScreen() {
       {/* --------------------------------------------------------------- about */}
       <SectionHeading>{t('profile.about')}</SectionHeading>
       <Card>
-        <Text variant="bodyStrong">{t('common.appName')}</Text>
-        <Text variant="caption" tone="muted">
-          {t('common.tagline')}
-        </Text>
+        <Row style={{ gap: theme.spacing.md }}>
+          <Image
+            source={require('../../assets/logo.png')}
+            style={{ width: 40, height: 60 }}
+            resizeMode="contain"
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+          />
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyStrong">{t('common.appName')}</Text>
+            <Text variant="caption" tone="muted">
+              {t('common.tagline')}
+            </Text>
+          </View>
+        </Row>
         <Spacer size="md" />
         <Text variant="caption" tone="muted">
           {t('profile.version', { version })}

@@ -1,13 +1,14 @@
 # Privacy Policy — Eyedrop Scheduler
 
-**Last updated: 23 October 2026**
+**Last updated: 12 November 2026**
 
 ## The short version
 
 Eyedrop Scheduler keeps everything on your phone. There is no account, no
 sign-in, and no server. We do not collect, transmit, store or sell any
 information about you, and we could not read your medication history even if we
-wanted to.
+wanted to. The only thing that uses the internet is the "How to use eye drops"
+video, which streams from Google Drive when you open it.
 
 ## What the app stores, and where
 
@@ -29,8 +30,15 @@ your phone's operating system; the app never sees your fingerprint or face data.
 
 ## Network use
 
-In its current configuration **the app makes no network requests at all.** It
-works fully offline.
+**The app works offline, with one exception: the how-to videos.** When you open
+**Profile → How to use eye drops**, the video is streamed from Google Drive and
+played in Google's own player. Google receives the same technical information
+any website or video player does — such as your IP address, device and browser
+details, and which video was requested — and handles it under
+[Google's Privacy Policy](https://policies.google.com/privacy). The app sends
+nothing about you, your people, your medications or your schedule with that
+request, and you do not need a Google account or to sign in. If you never open
+that screen, the app makes no network requests for it.
 
 The app contains one optional, non-personal network feature: fetching public
 fundraising totals to display how many spectacle frames have been funded. It is
@@ -46,20 +54,23 @@ needs notification permission purely so your phone can alert you.
 
 ## Sharing — only when you choose to
 
-Two features produce a file, and in both cases **you** decide where it goes
-using your phone's normal share sheet:
+Two features produce something to share, and in both cases **you** decide where
+it goes using your phone's normal share sheet:
 
 - **Backup** — a file containing all your data, so you can move to a new phone
-- **Adherence report** — a readable summary you may want to show your doctor
+- **Adherence report** — a readable summary you may want to show your doctor,
+  shared as text (for an email, the subject is "Adherence Report: " followed by
+  the person's name)
 
-These files are created on your device and handed to whichever app you pick. We
-never receive a copy.
+These are created on your device and handed to whichever app you pick. We never
+receive a copy.
 
 ## What we do not do
 
 - No analytics or usage tracking of any kind
 - No advertising, and no advertising identifiers
-- No third-party trackers or data-collection SDKs
+- No third-party analytics, advertising or data-collection SDKs in the app (the
+  how-to video is played by Google Drive's own player, as described above)
 - No crash reporting that transmits your data
 - No selling or sharing of personal information, because none is collected
 
@@ -81,7 +92,7 @@ Because the phone is the only copy, we strongly recommend saving a backup file
 
 The app helps you keep to a medication schedule. It does not provide medical
 advice and is not a substitute for your doctor or pharmacist. Any guidance in
-the app — such as the eye-drop technique page — is general information only,
+the app — such as the how-to videos — is general information only,
 and your clinician's instructions always take priority.
 
 ## Changes

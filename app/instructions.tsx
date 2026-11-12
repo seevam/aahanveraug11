@@ -1,167 +1,112 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { useState } from 'react';
+import { Image, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { Card, EmojiIcon, Row, Screen, SectionHeading, Spacer, Text } from '../src/components/primitives';
+import { EmojiIcon, Row, Screen, SectionHeading, Spacer, Text } from '../src/components/primitives';
 import { Button } from '../src/components/Button';
+import { DriveVideo } from '../src/components/DriveVideo';
 import { useTheme } from '../src/theme/ThemeProvider';
-import { capColours } from '../src/theme/tokens';
-import { DEFAULT_GAP_MINUTES } from '../src/scheduling/types';
+import { useAppStore } from '../src/stores/app-store';
+import { SUPPORTED_LANGUAGES } from '../src/i18n';
+import { thumbnailUrl, videosFor, type InstructionVideo } from '../src/instructions/videos';
 
 /**
- * How to use eye drops.
+ * How to use eye drops — three short videos, one per language.
  *
- * General technique guidance, not personalised advice — the disclaimer at the
- * top says so plainly and is not dismissible. Every step is numbered and
- * written as one short instruction, because this is read by someone who may be
- * holding a bottle in the other hand with one eye already wet.
- *
- * The content should be reviewed by an ophthalmologist before public launch,
- * and the Hindi and Tamil translations by a native speaker. Technique guidance
- * that is subtly wrong is worse than none.
+ * The one in the patient's own language plays first; the others sit underneath
+ * as thumbnails and swap in when tapped, so a caregiver who reads a different
+ * language can still find theirs. The videos stream from Google Drive; see
+ * `src/instructions/videos.ts` for why they are not bundled.
  */
 
-const STEP_COUNT = 10;
-const TIP_COUNT = 6;
+function endonym(code: string): string {
+  return SUPPORTED_LANGUAGES.find((l) => l.code === code)?.endonym ?? code;
+}
 
-/**
- * The cap colours worth explaining, each paired with the medication class it
- * signals. Only the classes the convention actually covers appear here —
- * lubricants, anti-allergy drops and antivirals have no assigned colour, so
- * listing them would imply a rule that does not exist.
- */
-const CAP_COLOUR_LEGEND = [
-  { colour: 'teal', classKey: 'glaucoma' },
-  { colour: 'pink', classKey: 'steroid' },
-  { colour: 'tan', classKey: 'antibiotic' },
-  { colour: 'red', classKey: 'mydriatic' },
-] as const;
-
-function Step({ number, text }: { number: number; text: string }) {
+function Thumbnail({ video, onPress }: { video: InstructionVideo; onPress: () => void }) {
   const theme = useTheme();
+  const { t } = useTranslation();
+  const [broken, setBroken] = useState(false);
+  const name = endonym(video.language);
+
   return (
-    <Row style={{ alignItems: 'flex-start', marginBottom: theme.spacing.lg }}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={t('instructions.watchIn', { language: name })}
+      style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.8 : 1 })}
+    >
       <View
         style={{
-          width: 32,
-          height: 32,
-          borderRadius: 16,
-          backgroundColor: theme.colors.primary,
+          aspectRatio: 16 / 9,
+          borderRadius: theme.radius.md,
+          overflow: 'hidden',
+          backgroundColor: theme.colors.surfaceRaised,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
           alignItems: 'center',
           justifyContent: 'center',
         }}
-        accessibilityElementsHidden
-        importantForAccessibility="no"
       >
-        <Text variant="label" style={{ color: theme.colors.onPrimary }}>
-          {number}
-        </Text>
+        {broken ? null : (
+          <Image
+            source={{ uri: thumbnailUrl(video.driveId, 360) }}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            resizeMode="cover"
+            onError={() => setBroken(true)}
+            accessible={false}
+          />
+        )}
+        {/* A scrim keeps the play mark legible over any frame, and over nothing. */}
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            backgroundColor: 'rgba(0,0,0,0.55)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <EmojiIcon symbol="▶" size={18} color="#fff" />
+        </View>
       </View>
-      <Text variant="body" style={{ flex: 1, paddingTop: 3 }}>
-        {text}
+      <Text variant="bodyStrong" style={{ textAlign: 'center', marginTop: theme.spacing.sm }}>
+        {name}
       </Text>
-    </Row>
+    </Pressable>
   );
 }
 
 export default function InstructionsScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const language = useAppStore((s) => s.language);
 
-  const steps = Array.from({ length: STEP_COUNT }, (_, i) => t(`instructions.step${i + 1}`));
-  const tips = Array.from({ length: TIP_COUNT }, (_, i) => t(`instructions.tip${i + 1}`));
+  // Starts in the app language; tapping a thumbnail swaps it into the player.
+  const [selected, setSelected] = useState<string>(language);
+  const { main, others } = videosFor(selected);
 
   return (
     <Screen>
-      <View style={{ alignItems: 'center' }}>
-        <EmojiIcon symbol="💧" size={52} />
-      </View>
-
-      <Spacer size="md" />
+      <Row style={{ justifyContent: 'center', marginTop: theme.spacing.sm }}>
+        <EmojiIcon symbol="💧" size={40} />
+      </Row>
+      <Spacer size="sm" />
       <Text variant="title" accessibilityRole="header" style={{ textAlign: 'center' }}>
         {t('instructions.title')}
       </Text>
-
-      <Spacer size="md" />
-      <Text variant="body" tone="secondary">
-        {t('instructions.intro')}
-      </Text>
-
       <Spacer size="lg" />
-      <Card
-        style={{
-          backgroundColor: theme.colors.warningSubtle,
-          borderColor: theme.colors.warning,
-        }}
-      >
-        <Text variant="caption" style={{ color: theme.colors.onWarningSubtle }}>
-          {t('instructions.disclaimer')}
-        </Text>
-      </Card>
 
-      <SectionHeading>{t('instructions.stepsHeading')}</SectionHeading>
-      {steps.map((text, index) => (
-        <Step key={index} number={index + 1} text={text} />
-      ))}
+      <DriveVideo key={main.driveId} driveId={main.driveId} />
 
-      <Card
-        style={{
-          backgroundColor: theme.colors.primarySubtle,
-          borderColor: theme.colors.primary,
-        }}
-      >
-        <Text variant="bodyStrong" tone="primary">
-          {t('instructions.gapHeading')}
-        </Text>
-        <Spacer size="sm" />
-        <Text variant="body" tone="secondary">
-          {t('instructions.gapBody', { minutes: DEFAULT_GAP_MINUTES })}
-        </Text>
-      </Card>
-
-      {/* The cap-colour convention, with its caveat stated where people see it
-          rather than buried in a code comment. */}
-      <SectionHeading>{t('capColour.heading')}</SectionHeading>
-      <Card>
-        <Text variant="body" tone="secondary">
-          {t('capColour.note')}
-        </Text>
-        <Spacer size="md" />
-        <View style={{ gap: theme.spacing.sm }}>
-          {CAP_COLOUR_LEGEND.map(({ colour, classKey }) => (
-            <Row key={colour}>
-              <View
-                style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: 8,
-                  backgroundColor: capColours[colour],
-                  borderWidth: 1,
-                  borderColor: theme.colors.borderStrong,
-                }}
-                accessibilityElementsHidden
-                importantForAccessibility="no"
-              />
-              <Text variant="caption" tone="secondary" style={{ flex: 1 }}>
-                {t(`capColour.${colour}`)} — {t(`medicationClass.${classKey}`)}
-              </Text>
-            </Row>
-          ))}
-        </View>
-      </Card>
-
-      <SectionHeading>{t('instructions.tipsHeading')}</SectionHeading>
-      {tips.map((text, index) => (
-        <Row key={index} style={{ alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
-          <Text variant="body" tone="primary">
-            •
-          </Text>
-          <Text variant="body" tone="secondary" style={{ flex: 1 }}>
-            {text}
-          </Text>
-        </Row>
-      ))}
+      <SectionHeading>{t('instructions.otherLanguages')}</SectionHeading>
+      <Row style={{ gap: theme.spacing.md, alignItems: 'flex-start' }}>
+        {others.map((video) => (
+          <Thumbnail key={video.driveId} video={video} onPress={() => setSelected(video.language)} />
+        ))}
+      </Row>
 
       <Spacer size="xl" />
       <Button label={t('common.done')} size="large" onPress={() => router.back()} />

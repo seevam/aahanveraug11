@@ -268,6 +268,19 @@ cannot read it.
   the ones the user must delete by hand after a schedule change. In this mode
   the app's own notification is silent and exists only to record Taken/Skip.
 
+- **Instruction videos** (Profile → How to use eye drops) stream from Google
+  Drive rather than being bundled — the three files are ~340 MB, against an app
+  of ~45 MB. The list, and the Drive id of each file, is in
+  `src/instructions/videos.ts`. Re-uploading a video changes its id, so update
+  it there. The folder must stay shared as "anyone with the link", and the
+  videos need an internet connection. Drive can throttle a heavily viewed
+  public file; if playback ever fails for everyone, host the files somewhere
+  built for video and change the URL helpers in the same file.
+- **Logo and icons** are all generated from `assets/brand/logo-source.png` by
+  `scripts/make-logo-assets.py` (launcher, adaptive, themed, splash, favicon,
+  in-app logo and the status-bar icon). To change the logo, replace that file
+  and re-run the script — the setup is in the script's header.
+
 ## Not built
 
 Carried over from the product plan and deliberately out of scope here:

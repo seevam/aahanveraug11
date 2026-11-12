@@ -88,6 +88,9 @@ export function alarmChannelId(sound: boolean, vibrate: boolean): string {
 
 export const DOSE_CATEGORY_ID = 'dose-reminder';
 
+/** The logo's blue; tints the status-bar icon and the alarm's accent. */
+const BRAND_COLOUR = '#4AA3D4';
+
 /** Must match the file copied into res/raw by `plugins/withAlarmSupport.js`. */
 const ALARM_SOUND_ANDROID = 'alarm_tone';
 const ALARM_SOUND_IOS = 'alarm_tone.wav';
@@ -343,7 +346,9 @@ export async function scheduleDose(
         category: rings ? AndroidCategory.ALARM : AndroidCategory.REMINDER,
         importance: AndroidImportance.HIGH,
         visibility: AndroidVisibility.PUBLIC,
-        smallIcon: 'ic_launcher',
+        // A white silhouette of the logo — see withNotificationIcon in the plugin.
+        smallIcon: 'ic_notification',
+        color: BRAND_COLOUR,
         // The four properties that make this an alarm rather than a banner.
         ...(rings ? { fullScreenAction: { id: 'dose-alarm', launchActivity: 'default' } } : {}),
         loopSound: sound,
