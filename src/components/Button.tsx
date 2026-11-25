@@ -86,17 +86,18 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={surface.fg} />
       ) : (
-        <>
-          {icon ? (
-            <EmojiIcon symbol={icon} size={18} color={surface.fg} />
-          ) : null}
-          <Text
-            variant={size === 'large' ? 'subheading' : 'bodyStrong'}
-            style={{ color: surface.fg, textAlign: 'center' }}
-          >
-            {label}
-          </Text>
-        </>
+        // One text node that fills the button, rather than an icon plus a
+        // label sized to its own measured width. A label sized to its
+        // measurement has no slack: if the phone draws it even slightly wider
+        // than it measured — which Hindi and Tamil did — the end is cut off.
+        // Filling the button leaves room, and the label can wrap if it must.
+        <Text
+          variant={size === 'large' ? 'subheading' : 'bodyStrong'}
+          style={{ color: surface.fg, textAlign: 'center', flexGrow: 1, flexShrink: 1 }}
+        >
+          {icon ? `${icon}  ` : ''}
+          {label}
+        </Text>
       )}
     </Pressable>
   );

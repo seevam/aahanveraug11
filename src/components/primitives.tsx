@@ -12,8 +12,10 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../theme/ThemeProvider';
+import { scriptTextStyle } from '../theme/script-fonts';
 import type { TypographyVariant } from '../theme/tokens';
 
 type ToneName = 'default' | 'secondary' | 'muted' | 'primary' | 'success' | 'warning' | 'danger' | 'inverse';
@@ -25,6 +27,7 @@ export function Text({
   ...rest
 }: TextProps & { variant?: TypographyVariant; tone?: ToneName }) {
   const theme = useTheme();
+  const { i18n } = useTranslation();
 
   const toneColor: Record<ToneName, string> = {
     default: theme.colors.text,
@@ -49,11 +52,27 @@ export function Text({
     typeof flattened?.fontSize === 'number' ? flattened.fontSize : typeStyle.fontSize;
   const lineHeightRatio = typeStyle.lineHeight / typeStyle.fontSize;
 
+  // Hindi and Tamil need their own font and a taller line, or Android clips
+  // them; see src/theme/script-fonts.ts. Applied after the caller's style so a
+  // caller's `fontWeight` picks the right font file instead of being faked.
+  const script = scriptTextStyle(i18n.language, {
+    fontSize: effectiveFontSize,
+    lineHeight:
+      typeof flattened?.lineHeight === 'number'
+        ? flattened.lineHeight
+        : Math.ceil(effectiveFontSize * lineHeightRatio),
+    fontWeight: flattened?.fontWeight ?? (typeStyle.fontWeight as TextStyle['fontWeight']),
+  });
+
   return (
     <RNText
       // Respect the OS font-size setting, but stop runaway scaling from
       // breaking layouts the patient then cannot use at all.
       maxFontSizeMultiplier={1.6}
+      // Android's default "high quality" line breaking measures and draws
+      // complex scripts slightly differently; the simple strategy keeps the
+      // two in step, which is what stops the end of a label being cut off.
+      textBreakStrategy="simple"
       style={[
         {
           fontSize: typeStyle.fontSize,
@@ -62,6 +81,7 @@ export function Text({
           color: toneColor[tone],
         },
         style,
+        script,
       ]}
       {...rest}
     />

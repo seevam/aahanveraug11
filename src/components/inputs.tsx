@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../theme/ThemeProvider';
+import { scriptInputFont } from '../theme/script-fonts';
 import { EmojiIcon, Row, Text } from './primitives';
 import { hhmmToMinutes, minutesToHHMM } from '../scheduling/engine';
 import type { Weekday } from '../scheduling/types';
@@ -63,6 +65,7 @@ export function TextField({
   onBlur?: () => void;
 }) {
   const theme = useTheme();
+  const { i18n } = useTranslation();
   const [focused, setFocused] = useState(false);
 
   return (
@@ -91,6 +94,9 @@ export function TextField({
         backgroundColor: theme.colors.surface,
         color: theme.colors.text,
         fontSize: theme.typography.body.fontSize,
+        // Typed Hindi or Tamil uses the same bundled font as the rest of the
+        // app, so it is not clipped either; see src/theme/script-fonts.ts.
+        fontFamily: scriptInputFont(i18n.language),
       }}
     />
   );
@@ -209,10 +215,16 @@ export function Segmented<T extends string>({
               backgroundColor: selected ? theme.colors.surface : 'transparent',
             }}
           >
+            {/* Fills the segment rather than shrinking to its measured width,
+                and may wrap: a cut-off label is worse than a two-line one. */}
             <Text
               variant="label"
-              style={{ color: selected ? theme.colors.text : theme.colors.textMuted }}
-              numberOfLines={1}
+              style={{
+                color: selected ? theme.colors.text : theme.colors.textMuted,
+                alignSelf: 'stretch',
+                textAlign: 'center',
+                paddingHorizontal: 4,
+              }}
             >
               {option.label}
             </Text>
@@ -379,10 +391,17 @@ export function DayPicker({
   value,
   onChange,
   labels,
+  shortLabels = labels,
 }: {
   value: Weekday[];
   onChange: (days: Weekday[]) => void;
+  /** Full day names, read out by screen readers. */
   labels: Record<Weekday, string>;
+  /**
+   * What fits on the button. Seven buttons share one row, so each is about
+   * 40dp wide: enough for "Mon", not for "मंगल" or "செவ்வாய்".
+   */
+  shortLabels?: Record<Weekday, string>;
 }) {
   const theme = useTheme();
   const order: Weekday[] = [1, 2, 3, 4, 5, 6, 0]; // Monday-first
@@ -416,13 +435,14 @@ export function DayPicker({
           >
             <Text
               variant="caption"
-              numberOfLines={1}
               style={{
                 color: selected ? theme.colors.onPrimary : theme.colors.textSecondary,
                 fontWeight: '600',
+                alignSelf: 'stretch',
+                textAlign: 'center',
               }}
             >
-              {labels[day]}
+              {shortLabels[day]}
             </Text>
           </Pressable>
         );
@@ -534,7 +554,7 @@ export function TimeList({
           opacity: pressed ? 0.7 : 1,
         })}
       >
-        <Text variant="label" tone="primary">
+        <Text variant="label" tone="primary" style={{ alignSelf: 'stretch', textAlign: 'center' }}>
           + {addLabel}
         </Text>
       </Pressable>

@@ -325,6 +325,17 @@ const en = {
     sat: 'Sat',
   },
 
+  // What fits on the seven day buttons, each about 40dp wide.
+  daysShort: {
+    sun: 'Sun',
+    mon: 'Mon',
+    tue: 'Tue',
+    wed: 'Wed',
+    thu: 'Thu',
+    fri: 'Fri',
+    sat: 'Sat',
+  },
+
   instructions: {
     linkLabel: 'How to use eye drops',
     title: 'How to use eye drops',

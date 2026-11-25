@@ -202,6 +202,15 @@ export function ReminderForm({
     5: t('days.fri'),
     6: t('days.sat'),
   };
+  const dayShortLabels: Record<Weekday, string> = {
+    0: t('daysShort.sun'),
+    1: t('daysShort.mon'),
+    2: t('daysShort.tue'),
+    3: t('daysShort.wed'),
+    4: t('daysShort.thu'),
+    5: t('daysShort.fri'),
+    6: t('daysShort.sat'),
+  };
 
   const patch = (partial: Partial<ReminderFormValue>) => onChange({ ...value, ...partial });
 
@@ -329,6 +338,7 @@ export function ReminderForm({
         <DayPicker
           value={value.daysOfWeek}
           labels={dayLabels}
+          shortLabels={dayShortLabels}
           onChange={(daysOfWeek) => patch({ daysOfWeek })}
         />
       </Field>
@@ -430,7 +440,6 @@ export function ReminderForm({
       <Button
         label={t('instructions.linkLabel')}
         variant="ghost"
-        icon="💧"
         onPress={() => router.push('/instructions')}
       />
 

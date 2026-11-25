@@ -67,7 +67,20 @@
           "faceIDPermission": "Eyedrop Scheduler uses Face ID to unlock your medication history."
         }
       ],
-      "./plugins/withAlarmSupport"
+      "./plugins/withAlarmSupport",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Hind-Regular.ttf",
+            "./assets/fonts/Hind-SemiBold.ttf",
+            "./assets/fonts/Hind-Bold.ttf",
+            "./assets/fonts/HindMadurai-Regular.ttf",
+            "./assets/fonts/HindMadurai-SemiBold.ttf",
+            "./assets/fonts/HindMadurai-Bold.ttf"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

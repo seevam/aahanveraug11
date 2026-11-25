@@ -5,18 +5,28 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmojiIcon } from '../../src/components/primitives';
 import { useTheme } from '../../src/theme/ThemeProvider';
+import { scriptTextStyle } from '../../src/theme/script-fonts';
 
 const ICON_SIZE = 24;
 
 export default function TabsLayout() {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
+
+  // Hindi and Tamil labels need their own font and a taller line; see
+  // src/theme/script-fonts.ts.
+  const BASE_LABEL_LINE = 16;
+  const label = scriptTextStyle(i18n.language, {
+    fontSize: 12,
+    lineHeight: BASE_LABEL_LINE,
+    fontWeight: '600',
+  });
 
   // The bar has to fit an icon, its label, and the home indicator on phones
   // that have one. A fixed height ignores the inset and crops the icons, so
-  // derive it instead.
-  const barHeight = 58 + insets.bottom;
+  // derive it instead — including any extra height the label's script needs.
+  const barHeight = 58 + (label.lineHeight - BASE_LABEL_LINE) + insets.bottom;
 
   return (
     <Tabs
@@ -37,7 +47,7 @@ export default function TabsLayout() {
           height: Math.ceil(ICON_SIZE * 1.35),
           width: Math.ceil(ICON_SIZE * 1.35),
         },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 12, ...label },
       }}
     >
       <Tabs.Screen
