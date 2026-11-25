@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useTheme } from '../theme/ThemeProvider';
-import { EmojiIcon, Text } from './primitives';
+import { Text } from './primitives';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'success' | 'danger';
 export type ButtonSize = 'regular' | 'large';
