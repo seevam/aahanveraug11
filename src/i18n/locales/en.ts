@@ -237,6 +237,7 @@ const en = {
     notificationsOff: 'Off — tap to fix',
     version: 'Version {{version}}',
     dataNote: 'All your data stays on this phone. Only the how-to videos use the internet.',
+    privacyPolicy: 'Privacy policy',
   },
 
   security: {

@@ -247,6 +247,7 @@ const hi: Translation = {
     notificationsOff: 'बंद — ठीक करने के लिए दबाएँ',
     version: 'वर्ज़न {{version}}',
     dataNote: 'आपका सारा डेटा इसी फ़ोन में रहता है। सिर्फ़ जानकारी वाले वीडियो के लिए इंटरनेट चाहिए।',
+    privacyPolicy: 'प्राइवेसी पॉलिसी',
   },
 
   security: {

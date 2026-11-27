@@ -22,6 +22,7 @@ import { Avatar } from '../../src/components/PatientSwitcher';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAppStore } from '../../src/stores/app-store';
 import { patients as patientRepo } from '../../src/db/repositories';
+import { PRIVACY_POLICY_URL } from '../../src/legal';
 import { SUPPORTED_LANGUAGES, type LanguageCode } from '../../src/i18n';
 import {
   batteryOptimised,
@@ -500,6 +501,14 @@ export default function ProfileScreen() {
         <Text variant="caption" tone="muted">
           {t('profile.dataNote')}
         </Text>
+        <Spacer size="md" />
+        {/* Google Play requires the privacy policy to be reachable from
+            inside the app as well as from the store listing. */}
+        <Button
+          label={t('profile.privacyPolicy')}
+          variant="secondary"
+          onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
+        />
       </Card>
     </Screen>
   );
