@@ -254,13 +254,17 @@ cannot read it.
 - Application id is **`com.eyedropscheduler.app`** on both platforms. This is
   permanent once the app is published to either store; it cannot be renamed or
   reused afterwards.
-- `USE_EXACT_ALARM` **is** requested, for the sideloaded APK: Android grants it
-  at install, so exact alarm timing needs no setup. **Review before a Play
-  Store release** — Google restricts it to apps whose core purpose is an alarm
-  clock or calendar, and a medication reminder may be rejected. To drop it,
-  remove it from `android.permissions` in `app.json`; the app then falls back
-  to `SCHEDULE_EXACT_ALARM`, and Profile → Alarm setup walks the user through
-  granting it.
+- `USE_EXACT_ALARM` is **blocked** (`android.blockedPermissions` in
+  `app.json`). It would pre-grant exact alarms, but Google Play restricts it to
+  alarm-clock and calendar apps. The app uses `SCHEDULE_EXACT_ALARM` instead;
+  Profile → Alarm setup walks the user through granting it, and until then
+  alarms still fire, just possibly a few minutes late. Also blocked, because
+  nothing uses them: `SYSTEM_ALERT_WINDOW` and legacy storage permissions.
+  Notifee's unused foreground service is removed from the manifest.
+- **Release signing**: with an upload key configured through Gradle
+  properties (see `withReleaseSigning` in `plugins/withAlarmSupport.js`),
+  release builds are signed with it; otherwise with the debug key. The key is
+  never stored in the repository.
 - Reminders can ring through the phone's own **Clock app** (Profile → Alarm
   setup → Ring reminders with). The app creates the alarms with Android's
   `AlarmClock` intents (`modules/clock-alarms/`). Android does not let apps

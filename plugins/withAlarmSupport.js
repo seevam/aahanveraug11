@@ -1,6 +1,7 @@
 const {
   AndroidConfig,
   withAndroidManifest,
+  withAppBuildGradle,
   withDangerousMod,
   withMainApplication,
   withSettingsGradle,
@@ -276,11 +277,105 @@ function withPluginRepositories(config) {
   });
 }
 
+/**
+ * Notifee declares a foreground service (type "shortService") for
+ * notifications shown as ongoing work. This app never shows one, and on
+ * Android 14+ every declared foreground-service type has to be justified to
+ * Google Play in a declaration form, so the unused service is removed rather
+ * than explained.
+ */
+function withoutNotifeeForegroundService(config) {
+  return withAndroidManifest(config, (cfg) => {
+    const manifest = cfg.modResults.manifest;
+    manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
+    const app = AndroidConfig.Manifest.getMainApplicationOrThrow(cfg.modResults);
+    app.service = (app.service ?? []).filter(
+      (s) => s.$['android:name'] !== 'app.notifee.core.ForegroundService',
+    );
+    app.service.push({
+      $: { 'android:name': 'app.notifee.core.ForegroundService', 'tools:node': 'remove' },
+    });
+    return cfg;
+  });
+}
+
+/**
+ * Release builds are signed with the upload key when one is configured, and
+ * with the debug key otherwise, so a test APK can still be built anywhere.
+ *
+ * The key never lives in this repository. Its location and passwords come from
+ * Gradle properties — normally ~/.gradle/gradle.properties on the machine that
+ * builds for Google Play:
+ *
+ *   EYEDROP_UPLOAD_STORE_FILE=/absolute/path/to/upload-keystore.jks
+ *   EYEDROP_UPLOAD_STORE_PASSWORD=...
+ *   EYEDROP_UPLOAD_KEY_ALIAS=upload
+ *   EYEDROP_UPLOAD_KEY_PASSWORD=...
+ *
+ * Google Play re-signs the app with its own key (Play App Signing); this one
+ * only proves an upload came from you. Losing it is recoverable through Play
+ * Console support, but every update must be signed with it until then.
+ */
+function withReleaseSigning(config) {
+  return withAppBuildGradle(config, (cfg) => {
+    let gradle = cfg.modResults.contents;
+    if (gradle.includes('EYEDROP_UPLOAD_STORE_FILE')) return cfg;
+
+    const debugBlock = `        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }`;
+    if (!gradle.includes(debugBlock)) {
+      throw new Error('withAlarmSupport: could not find the debug signing config in app/build.gradle.');
+    }
+    gradle = gradle.replace(
+      debugBlock,
+      `        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            if (project.hasProperty('EYEDROP_UPLOAD_STORE_FILE')) {
+                storeFile file(EYEDROP_UPLOAD_STORE_FILE)
+                storePassword EYEDROP_UPLOAD_STORE_PASSWORD
+                keyAlias EYEDROP_UPLOAD_KEY_ALIAS
+                keyPassword EYEDROP_UPLOAD_KEY_PASSWORD
+            }
+        }
+    }`,
+    );
+
+    const releaseSigning = `            // Caution! In production, you need to generate your own keystore file.
+            // see https://reactnative.dev/docs/signed-apk-android.
+            signingConfig signingConfigs.debug`;
+    if (!gradle.includes(releaseSigning)) {
+      throw new Error('withAlarmSupport: could not find the release signingConfig in app/build.gradle.');
+    }
+    gradle = gradle.replace(
+      releaseSigning,
+      `            // The upload key when configured (see plugins/withAlarmSupport.js), else debug.
+            signingConfig project.hasProperty('EYEDROP_UPLOAD_STORE_FILE') ? signingConfigs.release : signingConfigs.debug`,
+    );
+
+    cfg.modResults.contents = gradle;
+    return cfg;
+  });
+}
+
 module.exports = function withAlarmSupport(config) {
-  return withPluginRepositories(
-    withAlarmChannel(
-      withNotificationIcon(
-        withAlarmSound(withLockScreenActivity(withFullScreenIntentPermission(config))),
+  return withReleaseSigning(
+    withoutNotifeeForegroundService(
+      withPluginRepositories(
+        withAlarmChannel(
+          withNotificationIcon(
+            withAlarmSound(withLockScreenActivity(withFullScreenIntentPermission(config))),
+          ),
+        ),
       ),
     ),
   );

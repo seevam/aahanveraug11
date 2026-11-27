@@ -171,10 +171,9 @@ export async function requestPermission(): Promise<PermissionState> {
 /**
  * Opens the system screen where the user allows exact alarms.
  *
- * The sideloaded APK declares USE_EXACT_ALARM, which Android grants at
- * install, so this is normally already allowed. It is kept for a Play build:
- * Google restricts USE_EXACT_ALARM to alarm-clock and calendar apps, and
- * without it Android 14+ starts with exact alarms off. See README.
+ * Android 14+ starts with exact alarms off. The app deliberately does not
+ * declare USE_EXACT_ALARM, which would pre-grant it: Google Play restricts
+ * that to alarm-clock and calendar apps. See README.
  */
 export async function openAlarmSettings(): Promise<void> {
   if (Platform.OS !== 'android') return;

@@ -328,9 +328,8 @@ export default function ProfileScreen() {
           ) : null}
 
           {/* Without this grant, alarms still fire but may be minutes late:
-              see strongestAlarmType in service.ts. USE_EXACT_ALARM in
-              app.json normally pre-grants it; the step stays for builds
-              without it (see README). */}
+              see strongestAlarmType in service.ts. USE_EXACT_ALARM, which
+              would pre-grant it, is blocked for Google Play (see README). */}
           <SetupStep
             title={t('profile.exactAlarms')}
             body={t('profile.exactAlarmsBody')}
