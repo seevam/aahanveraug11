@@ -241,7 +241,7 @@ export async function openFullScreenAlarmSettings(): Promise<void> {
   if (!NEEDS_FULL_SCREEN_GRANT) return;
   try {
     await startActivityAsync('android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT', {
-      data: `package:${Constants.expoConfig?.android?.package ?? 'com.eyedropscheduler.app'}`,
+      data: `package:${Constants.expoConfig?.android?.package ?? 'com.ahaan.eyedropscheduler'}`,
     });
   } catch {
     // Some manufacturers remove the screen; the app info page is the next best.

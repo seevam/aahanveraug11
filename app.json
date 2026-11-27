@@ -12,7 +12,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.eyedropscheduler.app",
+      "bundleIdentifier": "com.ahaan.eyedropscheduler",
       "infoPlist": {
         "NSFaceIDUsageDescription": "Eyedrop Scheduler uses Face ID to unlock your medication history.",
         "UIBackgroundModes": [
@@ -24,7 +24,7 @@
       }
     },
     "android": {
-      "package": "com.eyedropscheduler.app",
+      "package": "com.ahaan.eyedropscheduler",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",

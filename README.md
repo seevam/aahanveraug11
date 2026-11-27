@@ -251,7 +251,7 @@ cannot read it.
 - Privacy policy: [`PRIVACY.md`](PRIVACY.md), with a hosted copy in
   [`docs/`](docs/index.html) for GitHub Pages — Google Play requires a public
   URL for it.
-- Application id is **`com.eyedropscheduler.app`** on both platforms. This is
+- Application id is **`com.ahaan.eyedropscheduler`** on both platforms. This is
   permanent once the app is published to either store; it cannot be renamed or
   reused afterwards.
 - `USE_EXACT_ALARM` is **blocked** (`android.blockedPermissions` in
